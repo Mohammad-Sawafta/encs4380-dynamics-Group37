@@ -1,6 +1,10 @@
 # ENCS4380 Dynamic Characteristics Toolkit - Group 37
 
-This is the local Module 1 implementation for Checkpoint 1 on Tuesday, 3 November 2026. The website is not published yet. The source repository is [encs4380-dynamics-Group37](https://github.com/Mohammad-Sawafta/encs4380-dynamics-Group37), but this README does not claim that GitHub Pages has been deployed.
+This is the Module 1 implementation for Checkpoint 1 on Tuesday, 3 November 2026.
+
+**Live website:** [Open the Dynamic Characteristics Toolkit](https://mohammad-sawafta.github.io/encs4380-dynamics-Group37/).
+
+The [source repository](https://github.com/Mohammad-Sawafta/encs4380-dynamics-Group37) publishes automatically through GitHub Pages from the root of `main`, with HTTPS enabled. The website works directly in a browser without an account or a local server.
 
 ## Run locally
 
@@ -58,7 +62,9 @@ node tests/first-order.test.cjs
 
 The tests compare the closed-form step and ramp outputs against an independent RK4 integration of the governing differential equation. They also check non-unit gains and input sizes, the ramp-error identity and limit, the asymptotic lag, and the natural-log slope. The numerical integrator is a development test, not a claimed bonus feature of the website.
 
-Local verification on 2 November 2026: all 470 numerical assertions passed. Browser checks covered prediction feedback, slider limits, Step/Ramp switching, both diagnostic scales, repeated zoom/reset, and layouts at 1280, 390, and 320 pixels wide. No browser errors were reported. A physical-phone check of the published website is still pending.
+Local verification on 2 November 2026: all 470 numerical assertions passed. Browser checks covered prediction feedback, slider limits, Step/Ramp switching, both diagnostic scales, repeated zoom/reset, and layouts at 1280, 390, and 320 pixels wide. No browser errors were reported.
+
+Published-site verification on 2 November 2026: all five HTML, CSS, and JavaScript files loaded successfully and matched the reviewed files. Live browser checks passed at 390 and 320 pixels wide, including rendered graphs, prediction feedback, ramp values, the natural-log diagnostic, resets, and no horizontal page overflow or console errors. Mohammad also confirmed that the published website worked on a physical phone; the phone model and browser were not recorded.
 
 ## File responsibilities
 
@@ -81,14 +87,14 @@ Accounts verified from the repository owner and collaborator invitations on 1 No
 
 The following is the group's **planned ownership** for the remaining work. It is a plan, not a claim that every module is complete:
 
-| Module | Planned owner | Current status in this local copy |
+| Module | Planned owner | Current status |
 | --- | --- | --- |
-| Module 1 - first-order time response | Mohammad | Implemented; equations and 470 numerical assertions verified locally |
+| Module 1 - first-order time response | Mohammad | Published on GitHub Pages; 470 numerical assertions passed and phone check confirmed |
 | Module 2 - first-order frequency response | Yanal | Planned for Checkpoint 2; not implemented in this work |
 | Module 3 - second-order response and state-space panel | Saif | Planned for Checkpoint 2; not implemented in this work |
 | Module 4 - Guess the Sensor challenge | Mohammad | Planned for the final release; not implemented in this work |
 
-Only Module 1 is present in this local copy. Before submission, record the planned owners in the corresponding assigned GitHub Issues. Completed contributions must be confirmed from the actual files and commit history rather than inferred from this plan.
+Only Module 1 is currently published. Before submission, record the planned owners in the corresponding assigned GitHub Issues. Completed contributions must be confirmed from the actual files and commit history rather than inferred from this plan.
 
 ## Screenshots
 
@@ -104,9 +110,9 @@ AI assistance was used to help draft the interface and JavaScript, check equatio
 
 ## Before the Tuesday checkpoint
 
-- Publish the reviewed files to the group repository and enable GitHub Pages.
-- Add the verified live website link here.
-- Check the live website on an actual phone.
-- Confirm teammate and instructor access, and record module owners in assigned Issues.
+- [x] Publish the reviewed files to the group repository and enable GitHub Pages.
+- [x] Add the verified live website link here.
+- [x] Check the live website on an actual phone.
+- [ ] Confirm teammate and instructor access, and record module owners in assigned Issues.
 
 The local files are not a substitute for the required five-minute check of the live Pages link.
