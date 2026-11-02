@@ -1,0 +1,117 @@
+    /* CSS controls appearance. The page becomes one column on smaller screens. */
+    :root {
+      color-scheme: light;
+      --page: oklch(0.973 0.007 160);
+      --surface: oklch(0.993 0.003 160);
+      --ink: oklch(0.26 0.025 165);
+      --muted: oklch(0.46 0.025 165);
+      --line: oklch(0.84 0.018 160);
+      --accent: oklch(0.42 0.09 170);
+      --tint: oklch(0.94 0.025 160);
+      --purple: oklch(0.46 0.15 300);
+      --orange: oklch(0.49 0.12 50);
+      --error: oklch(0.43 0.14 25);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.6 "Segoe UI", system-ui, sans-serif; }
+    main { max-width: 1180px; margin: 0 auto; padding: 36px 28px 24px; }
+    header { margin-bottom: 28px; }
+    .eyebrow { color: var(--accent); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; }
+    h1 { margin: 10px 0 8px; font-size: 2rem; line-height: 1.2; letter-spacing: -0.025em; }
+    h2 { margin: 0 0 10px; font-size: 1.25rem; line-height: 1.3; }
+    p { max-width: 70ch; margin: 0 0 12px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.875rem; }
+    .workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .controls { padding: 24px; border-right: 1px solid var(--line); }
+    .formula { margin: 16px 0; font-size: 1.2rem; font-family: Georgia, serif; }
+    .constants { display: flex; gap: 20px; margin-bottom: 26px; font-size: 0.875rem; color: var(--muted); }
+    .control-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-weight: 600; }
+    output { color: var(--accent); font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+    input[type="range"] { width: 100%; min-height: 44px; margin: 8px 0 0; accent-color: var(--accent); cursor: pointer; }
+    .range-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; }
+    .control-note { font-size: 0.875rem; color: var(--muted); }
+    .chart-panel { padding: 22px 22px 18px; min-width: 0; }
+    .chart-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .chart-heading h2 { margin-bottom: 0; }
+    #plot, #error-plot { width: 100%; height: 400px; }
+    figure { margin: 12px 0 0; }
+    figcaption { color: var(--muted); font-size: 0.875rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 8px 0 10px; font-size: 0.875rem; }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .swatch { width: 19px; height: 3px; background: var(--accent); }
+    .swatch.dashed { height: 0; background: none; border-top: 2px dashed var(--muted); }
+    .swatch.point { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); }
+    .swatch.square { width: 8px; height: 8px; background: var(--orange); }
+    button { min-height: 44px; padding: 9px 16px; border: 1px solid var(--accent); border-radius: 6px; color: var(--surface); background: var(--accent); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+    button:hover { filter: brightness(1.12); }
+    button:active { filter: brightness(0.92); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button.secondary { background: transparent; color: var(--accent); }
+    :focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+    .chart-status { padding: 14px; margin-top: 14px; background: var(--tint); border-radius: 6px; }
+    .chart-status.error { color: var(--error); }
+    #retry-chart, #retry-error-chart { margin-top: 10px; }
+    [hidden] { display: none !important; }
+    .below { display: grid; grid-template-columns: 1.15fr 1fr; gap: 40px; padding-top: 32px; }
+    .table-scroll { overflow-x: auto; margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; font-weight: 600; margin-bottom: 8px; }
+    th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--line); }
+    th:first-child, td:first-child { padding-left: 0; }
+    thead th { color: var(--muted); font-size: 0.8rem; font-weight: 600; }
+    tbody th { font-weight: 600; white-space: nowrap; }
+    .pass { color: var(--accent); font-weight: 700; }
+    .fail { color: var(--error); font-weight: 700; }
+    .tolerance { margin-top: 10px; font-size: 0.8rem; color: var(--muted); }
+    fieldset { border: 0; padding: 0; margin: 16px 0 14px; }
+    legend { padding: 0; font-size: 0.875rem; font-weight: 600; margin-bottom: 8px; }
+    .choice { display: flex; gap: 10px; align-items: center; min-height: 44px; cursor: pointer; font-size: 0.875rem; }
+    input[type="radio"] { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+    #prediction-feedback { min-height: 0; margin-top: 12px; font-size: 0.875rem; }
+    footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--muted); }
+    @media (max-width: 800px) {
+      .workspace, .below { grid-template-columns: 1fr; }
+      .controls { border-right: 0; border-bottom: 1px solid var(--line); }
+      .constants { margin-bottom: 18px; }
+      .below { gap: 30px; }
+    }
+    @media (max-width: 480px) {
+      main { padding: 24px 16px 20px; }
+      h1 { font-size: 1.75rem; }
+      .controls, .chart-panel { padding: 18px 14px; }
+      .chart-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
+      #plot, #error-plot { height: 330px; }
+      th, td { padding: 9px 6px; }
+    }
+
+    /* Module 1 additions keep the same study-tool layout and color vocabulary. */
+    .prediction-panel { padding: 22px 24px; margin-bottom: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .prediction-choices { margin: 12px 0 8px; display: flex; flex-wrap: wrap; gap: 4px 28px; }
+    .prediction-choices legend { font-size: 1rem; }
+    .prediction-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    #prediction-feedback:empty { margin: 0; }
+    .field-label { display: block; font-weight: 600; font-size: 0.875rem; margin: 12px 0 6px; }
+    select { min-height: 44px; width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 0.875rem; }
+    select:disabled, input:disabled { opacity: 0.55; cursor: not-allowed; }
+    .input-description { margin: 8px 0 24px; }
+    .swatch.dotted { height: 0; background: none; border-top: 2px dotted var(--purple); }
+    .swatch.lag { background: var(--purple); }
+    .swatch.error-line { background: var(--orange); }
+    .metrics { display: flex; flex-wrap: wrap; gap: 14px 28px; margin: 20px 0 16px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .metrics div { flex: 1 1 130px; }
+    .metrics dt { color: var(--muted); font-size: 0.8rem; }
+    .metrics dd { margin: 3px 0 0; font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .validation-section { margin-top: 32px; }
+    .diagnostic-section { margin-top: 32px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .diagnostic-section .chart-heading { margin-bottom: 14px; }
+    .diagnostic-control { max-width: 320px; margin: 12px 0 18px; }
+    .diagnostic-section figcaption { margin-bottom: 18px; }
+    @media (max-width: 480px) {
+      .prediction-panel, .diagnostic-section { padding: 18px 14px; }
+      .prediction-choices { display: block; }
+      .prediction-actions { align-items: stretch; flex-direction: column; }
+      .metrics { gap: 14px 18px; }
+      .formula { font-size: 1.08rem; }
+      .table-scroll table { min-width: 320px; }
+    }
