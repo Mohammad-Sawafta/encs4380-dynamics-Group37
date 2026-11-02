@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore first-order sensor step and ramp responses, time lag, and logarithmic error diagnostics.">
+  <title>First-order time response | Group 37</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
+  <script defer src="js/models/first-order.js"></script>
+  <script defer src="js/plotting.js"></script>
+  <script defer src="js/module1.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">ENCS4380 · Group 37 · Module 1</div>
+      <h1>First-order time response</h1>
+      <p class="muted">Explore how a sensor follows a sudden change or a steadily rising input. Make a prediction, then investigate the response.</p>
+    </header>
+
+    <section class="prediction-panel" aria-labelledby="prediction-heading">
+      <h2 id="prediction-heading">Predict, then check</h2>
+      <fieldset class="prediction-choices">
+        <legend>For a step input, if τ increases while K stays fixed, the response becomes…</legend>
+        <label class="choice"><input type="radio" name="prediction" value="faster"> Faster</label>
+        <label class="choice"><input type="radio" name="prediction" value="slower"> Slower</label>
+        <label class="choice"><input type="radio" name="prediction" value="same"> The same speed</label>
+      </fieldset>
+      <p id="prediction-helper" class="small muted" role="status">Choose a prediction to unlock the experiment controls.</p>
+      <div class="prediction-actions">
+        <button id="check-prediction" type="button" disabled>Check prediction</button>
+        <button id="reset-exercise" class="secondary" type="button">Reset exercise and controls</button>
+      </div>
+      <p id="prediction-feedback" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="workspace" aria-label="First-order response explorer">
+      <div class="controls">
+        <h2>The experiment</h2>
+        <p class="formula">τ dy/dt + y = Kx</p>
+        <p class="control-note">Zero initial output: y(0) = 0. All times are in seconds.</p>
+        <label class="field-label" for="input-type">Input</label>
+        <select id="input-type" disabled aria-describedby="input-description">
+          <option value="step">Step</option>
+          <option value="ramp">Ramp</option>
+        </select>
+        <p id="input-description" class="control-note input-description">Unit step: x(t) = A = 1 for t ≥ 0.</p>
+
+        <div class="control-heading">
+          <label for="gain">Gain K</label>
+          <output id="gain-value" for="gain">1.0</output>
+        </div>
+        <input id="gain" type="range" min="0.2" max="5" step="0.1" value="1" disabled aria-describedby="gain-help" aria-valuetext="1.0">
+        <div class="range-labels" aria-hidden="true"><span>0.2</span><span>5.0</span></div>
+        <p id="gain-help" class="control-note">Gain relates the calibrated output to the input.</p>
+
+        <div class="control-heading">
+          <label for="tau">Time constant τ</label>
+          <output id="tau-value" for="tau">2.0 s</output>
+        </div>
+        <input id="tau" type="range" min="0.5" max="5" step="0.1" value="2" disabled aria-describedby="tau-help" aria-valuetext="2.0 seconds">
+        <div class="range-labels" aria-hidden="true"><span>0.5 s</span><span>5.0 s</span></div>
+        <p id="tau-help" class="control-note">Drag a slider or focus it and use the arrow keys.</p>
+      </div>
+
+      <div class="chart-panel">
+        <div class="chart-heading">
+          <h2 id="response-heading">Step response</h2>
+          <button id="reset-view" class="secondary" type="button" disabled>Reset response view</button>
+        </div>
+        <p id="step-formula" class="formula">y(t) = KA(1 − e<sup>−t/τ</sup>)</p>
+        <p id="ramp-formula" class="formula" hidden>y(t) = Kr[t − τ(1 − e<sup>−t/τ</sup>)]</p>
+        <div id="chart-status" class="chart-status" role="status">
+          <span id="chart-message">Loading the interactive graph…</span>
+          <button id="retry-chart" class="secondary" type="button" hidden>Reload graphs</button>
+        </div>
+        <noscript><p>Enable JavaScript to use the experiment, graphs, and checks.</p></noscript>
+        <figure>
+          <div id="plot" role="img" aria-label="First-order response graph" aria-describedby="plot-summary"></div>
+          <div id="step-legend" class="legend" aria-label="Step graph key">
+            <span><i class="swatch" aria-hidden="true"></i>Sensor output y(t)</span>
+            <span><i class="swatch dashed" aria-hidden="true"></i>Final value KA</span>
+            <span><i class="swatch point" aria-hidden="true"></i>At τ: 63.2%</span>
+            <span><i class="swatch square" aria-hidden="true"></i>At 3τ: ≈95%</span>
+          </div>
+          <div id="ramp-legend" class="legend" aria-label="Ramp graph key" hidden>
+            <span><i class="swatch" aria-hidden="true"></i>Sensor output y(t)</span>
+            <span><i class="swatch dashed" aria-hidden="true"></i>Ideal output Kx(t)</span>
+            <span><i class="swatch dotted" aria-hidden="true"></i>Asymptote Kr(t − τ)</span>
+            <span><i class="swatch lag" aria-hidden="true"></i>Asymptotic lag τ</span>
+            <span><i class="swatch error-line" aria-hidden="true"></i>Finite-time error e(t)</span>
+          </div>
+          <figcaption id="plot-summary">The time axis stays at 0–30 seconds so you can compare response speeds.</figcaption>
+        </figure>
+        <div id="ramp-details" hidden>
+          <dl class="metrics">
+            <div><dt>Asymptotic time lag</dt><dd id="ramp-lag">—</dd></div>
+            <div><dt>Error e(24 s)</dt><dd id="ramp-error">—</dd></div>
+            <div><dt>Steady-state error e<sub>ss</sub></dt><dd id="ramp-steady-error">—</dd></div>
+          </dl>
+          <p class="small muted">The horizontal bracket compares Krt with the asymptote Kr(t − τ) at the same output. The vertical bracket measures the actual error e(t) = Krt − y(t).</p>
+          <p class="small muted">e(t) = Krτ(1 − e<sup>−t/τ</sup>) approaches e<sub>ss</sub> = Krτ as t → ∞. The finite-time error is not exactly its limiting value; rounded numbers may look equal.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="validation-section" aria-labelledby="validation-heading">
+      <h2 id="validation-heading">Check the unit-step numbers</h2>
+      <p class="small muted">These checks always use a separate unit step at the current K and τ, including when the main graph shows a ramp. Expected values are 0.632KA and 0.950KA.</p>
+      <div class="table-scroll">
+        <table>
+          <caption id="validation-caption">Unit-step test at the current settings</caption>
+          <thead><tr><th scope="col">Time</th><th scope="col">Expected</th><th scope="col">Calculated</th><th scope="col">Result</th></tr></thead>
+          <tbody>
+            <tr><th id="time-one" scope="row">τ</th><td id="expected-one">—</td><td id="value-one">—</td><td id="result-one">Waiting</td></tr>
+            <tr><th id="time-three" scope="row">3τ</th><td id="expected-three">—</td><td id="value-three">—</td><td id="result-three">Waiting</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="validation-tolerance" class="tolerance">Pass when |calculated − expected| / KA ≤ 0.0005, allowing for rounded expected values.</p>
+    </section>
+
+    <section class="diagnostic-section" aria-labelledby="error-heading">
+      <div class="chart-heading">
+        <h2 id="error-heading">Step-error diagnostic</h2>
+        <button id="reset-error-view" class="secondary" type="button" disabled>Reset error view</button>
+      </div>
+      <p id="error-context" class="small muted">This diagnostic uses a separate unit step at the current K and τ.</p>
+      <p class="formula">ε(t) = [KA − y<sub>step</sub>(t)] / KA = e<sup>−t/τ</sup></p>
+      <div class="diagnostic-control">
+        <label class="field-label" for="error-view">Vertical scale</label>
+        <select id="error-view">
+          <option value="fraction">Error fraction (log axis)</option>
+          <option value="natural">Natural log ln(error)</option>
+        </select>
+      </div>
+      <div id="error-chart-status" class="chart-status" role="status">
+        <span id="error-chart-message">Loading the error graph…</span>
+        <button id="retry-error-chart" class="secondary" type="button" hidden>Reload graphs</button>
+      </div>
+      <figure>
+        <div id="error-plot" role="img" aria-label="Step-error diagnostic graph" aria-describedby="error-summary"></div>
+        <figcaption id="error-summary">The diagnostic spans six time constants.</figcaption>
+      </figure>
+      <p class="small">The slope statement refers to the natural logarithm: <strong>ln ε = −t/τ</strong>, so <strong>d(ln ε)/dt = −1/τ</strong>. A logarithmic error-fraction axis shows the same exponential decay as a straight line.</p>
+      <div class="table-scroll">
+        <table>
+          <caption id="slope-caption">Natural-log slope from two calculated error fractions</caption>
+          <thead><tr><th scope="col">Check</th><th scope="col">Expected</th><th scope="col">Calculated</th><th scope="col">Result</th></tr></thead>
+          <tbody><tr><th scope="row">Δln ε / Δt (s⁻¹)</th><td id="slope-expected">—</td><td id="slope-value">—</td><td id="slope-result">Waiting</td></tr></tbody>
+        </table>
+      </div>
+      <p class="tolerance">Slope tolerance: 10⁻⁹ s⁻¹. The two points are t = τ and t = 3τ.</p>
+    </section>
+
+    <footer>Module 1 · Local working copy · Step and ramp responses with step-error diagnostics.</footer>
+  </main>
+</body>
+</html>
