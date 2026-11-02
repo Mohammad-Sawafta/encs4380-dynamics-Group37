@@ -1,4 +1,3 @@
-    /* CSS controls appearance. The page becomes one column on smaller screens. */
     :root {
       color-scheme: light;
       --page: oklch(0.973 0.007 160);
@@ -85,7 +84,6 @@
       th, td { padding: 9px 6px; }
     }
 
-    /* Module 1 additions keep the same study-tool layout and color vocabulary. */
     .prediction-panel { padding: 22px 24px; margin-bottom: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
     .prediction-choices { margin: 12px 0 8px; display: flex; flex-wrap: wrap; gap: 4px 28px; }
     .prediction-choices legend { font-size: 1rem; }

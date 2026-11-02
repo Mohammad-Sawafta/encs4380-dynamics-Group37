@@ -1,5 +1,4 @@
 // Run with: node tests/first-order.test.cjs
-// This test uses an independent ODE integration to check both response formulas.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');

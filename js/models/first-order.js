@@ -1,4 +1,4 @@
-// Pure first-order model: no page elements or plotting library are needed.
+// First-order sensor equations.
 const FirstOrderModel = (() => {
   'use strict';
 

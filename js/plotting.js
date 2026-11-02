@@ -1,4 +1,4 @@
-// Shared graph styling and rendering. Sensor equations belong in model files.
+// Shared Plotly styling and rendering.
 const Plotting = (() => {
   'use strict';
 
@@ -37,7 +37,6 @@ const Plotting = (() => {
       ...config
     };
 
-    // react redraws an existing graph when its caller supplies new data.
     try {
       return Promise.resolve(Plotly.react(target, traces, graphLayout, graphConfig));
     } catch (error) {

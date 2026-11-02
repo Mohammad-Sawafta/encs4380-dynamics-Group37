@@ -1,7 +1,6 @@
 (() => {
   'use strict';
 
-  // Module 1 owns experiment settings and page behavior; equations live in the model.
   const STEP_AMPLITUDE = 1;
   const RAMP_SLOPE = 1;
   const END_TIME = 30;

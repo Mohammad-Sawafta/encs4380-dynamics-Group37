@@ -1,21 +1,15 @@
 # ENCS4380 Dynamic Characteristics Toolkit - Group 37
 
-This is the Module 1 implementation for Checkpoint 1 on Tuesday, 3 November 2026.
+An interactive toolkit for exploring sensor dynamics. Module 1 covers first-order step and ramp responses.
 
 **Live website:** [Open the Dynamic Characteristics Toolkit](https://mohammad-sawafta.github.io/encs4380-dynamics-Group37/).
 
-The [source repository](https://github.com/Mohammad-Sawafta/encs4380-dynamics-Group37) publishes automatically through GitHub Pages from the root of `main`, with HTTPS enabled. The website works directly in a browser without an account or a local server.
-
-## Run locally
-
-Open `index.html` in a web browser and keep the `css` and `js` folders beside it. An internet connection is needed to load the pinned Plotly.js library from its official CDN. No account, application backend, or build step is required.
-
-For an optional local preview, run `python -m http.server 8000` from this folder and open `http://localhost:8000`. This only serves the static files for development; it is not a deployment requirement.
+The [source repository](https://github.com/Mohammad-Sawafta/encs4380-dynamics-Group37) publishes through GitHub Pages. Open the live website in a desktop or phone browser. An internet connection is needed to load Plotly.js; no account or installation is required.
 
 ## Use Module 1
 
 1. Choose a prediction before moving the experiment controls.
-2. Change the time constant, then check your prediction.
+2. Increase the time constant while keeping K fixed and Step selected, then check your prediction.
 3. Explore gain K and switch between a step and a ramp input.
 4. Inspect the response markers, ramp lag, and dynamic error.
 5. Switch the step-error diagnostic between a logarithmic error axis and a natural-log plot.
@@ -60,11 +54,9 @@ To run the independent numerical checks with Node.js:
 node tests/first-order.test.cjs
 ```
 
-The tests compare the closed-form step and ramp outputs against an independent RK4 integration of the governing differential equation. They also check non-unit gains and input sizes, the ramp-error identity and limit, the asymptotic lag, and the natural-log slope. The numerical integrator is a development test, not a claimed bonus feature of the website.
+The tests compare the closed-form step and ramp outputs against an independent RK4 integration of the governing differential equation. They also check non-unit gains and input sizes, the ramp-error identity and limit, the asymptotic lag, and the natural-log slope.
 
-Local verification on 2 November 2026: all 470 numerical assertions passed. Browser checks covered prediction feedback, slider limits, Step/Ramp switching, both diagnostic scales, repeated zoom/reset, and layouts at 1280, 390, and 320 pixels wide. No browser errors were reported.
-
-Published-site verification on 2 November 2026: all five HTML, CSS, and JavaScript files loaded successfully and matched the reviewed files. Live browser checks passed at 390 and 320 pixels wide, including rendered graphs, prediction feedback, ramp values, the natural-log diagnostic, resets, and no horizontal page overflow or console errors. Mohammad also confirmed that the published website worked on a physical phone; the phone model and browser were not recorded.
+All 470 numerical assertions passed. Browser checks covered controls, predictions, both diagnostic scales, graph resets, and desktop and phone-width layouts. The published website was also checked on a physical phone.
 
 ## File responsibilities
 
@@ -77,42 +69,25 @@ Published-site verification on 2 November 2026: all five HTML, CSS, and JavaScri
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
 | `tests/first-order.test.cjs` | Independent numerical verification |
 
-## Group members and planned ownership
+## Group members and module ownership
 
-Accounts verified from the repository owner and collaborator invitations on 1 November 2026:
+- [Mohammad-Sawafta](https://github.com/Mohammad-Sawafta)
+- [Yanal Omar (yaniomar)](https://github.com/yaniomar)
+- [Saifeddin Saleh (saifsaleh05)](https://github.com/saifsaleh05)
 
-- [Mohammad-Sawafta](https://github.com/Mohammad-Sawafta), repository owner.
-- [Yanal Omar (yaniomar)](https://github.com/yaniomar), invitation pending at the time of the check.
-- [Saifeddin Saleh (saifsaleh05)](https://github.com/saifsaleh05), invitation pending at the time of the check.
-
-The following is the group's **planned ownership** for the remaining work. It is a plan, not a claim that every module is complete:
-
-| Module | Planned owner | Current status |
+| Module | Owner | Status |
 | --- | --- | --- |
-| Module 1 - first-order time response | Mohammad | Published on GitHub Pages; 470 numerical assertions passed and phone check confirmed |
-| Module 2 - first-order frequency response | Yanal | Planned for Checkpoint 2; not implemented in this work |
-| Module 3 - second-order response and state-space panel | Saif | Planned for Checkpoint 2; not implemented in this work |
-| Module 4 - Guess the Sensor challenge | Mohammad | Planned for the final release; not implemented in this work |
-
-Only Module 1 is currently published. Before submission, record the planned owners in the corresponding assigned GitHub Issues. Completed contributions must be confirmed from the actual files and commit history rather than inferred from this plan.
+| Module 1 - first-order time response | Mohammad | Published |
+| Module 2 - first-order frequency response | Yanal | Planned for Checkpoint 2 |
+| Module 3 - second-order response and state-space panel | Saif | Planned for Checkpoint 2 |
+| Module 4 - Guess the Sensor challenge | Mohammad | Planned for the final release |
 
 ## Screenshots
 
-Screenshots of the checked local implementation:
+![Step response and validation](docs/images/module1-step.jpg)
 
-![Step response and validation](docs/images/module1-step.png)
-
-![Ramp response, lag, and error](docs/images/module1-ramp.png)
+![Ramp response, lag, and error](docs/images/module1-ramp.jpg)
 
 ## AI assistance
 
-AI assistance was used to help draft the interface and JavaScript, check equations, and prepare numerical tests. Team members need to review and understand the code and equations they submit and explain in the demo.
-
-## Before the Tuesday checkpoint
-
-- [x] Publish the reviewed files to the group repository and enable GitHub Pages.
-- [x] Add the verified live website link here.
-- [x] Check the live website on an actual phone.
-- [ ] Confirm teammate and instructor access, and record module owners in assigned Issues.
-
-The local files are not a substitute for the required five-minute check of the live Pages link.
+AI assistance helped draft the interface and JavaScript, check equations, and prepare numerical tests.
