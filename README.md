@@ -1,6 +1,6 @@
 # ENCS4380 Dynamic Characteristics Toolkit - Group 37
 
-An interactive toolkit for exploring sensor dynamics. Module 1 covers first-order step and ramp responses, and Module 2 covers first-order frequency response.
+An interactive toolkit for exploring sensor dynamics. Modules 1 and 2 cover first-order time and frequency responses. Module 3 explores a second-order mass-spring-damper in the time, phase, and s-planes.
 
 **Live website:** [Open the Dynamic Characteristics Toolkit](https://mohammad-sawafta.github.io/encs4380-dynamics-Group37/).
 
@@ -29,7 +29,17 @@ The step amplitude is A = 1 input unit. The ramp slope is r = 1 input unit per s
 
 Module 2 uses `K = 1`, so the actual output/input amplitude ratio equals the normalized ratio `M`. The sine-wave graph shows the steady-state response and excludes the startup transient.
 
-## Equations and interpretation
+## Use Module 3
+
+1. Predict how increasing damping changes overshoot. Increase b from its default while keeping m = 1 kg and k = 4 N/m, then check your prediction.
+2. Explore the m, b, and k sliders or select the underdamped, critically damped, and overdamped examples.
+3. Read the first 10% and 90% crossings, first peak, and final entry into the ±2% band on the step plot. The live metrics report the time between the two rise crossings, peak time, percent overshoot, and settling time.
+4. Compare the eigenvalues of A with the transfer-function poles, then follow the displacement–velocity trajectory from rest to equilibrium.
+5. Review the expected and calculated values in homework validations 4–6.
+
+The input is a 1 N force step and the mass starts at rest. The model uses `G(s) = 1/(m*s^2 + b*s + k)` with `omega_n = sqrt(k/m)`, `zeta = b/(2*sqrt(m*k))`, and final displacement `1/k`. For state `[displacement, velocity]`, `A = [[0, 1], [-k/m, -b/m]]` and `B = [0, 1/m]`. The phase trajectory uses the same closed-form displacement and its time derivative. Critical and overdamped responses approach equilibrium monotonically and have zero overshoot.
+
+## First-order equations and interpretation
 
 The homework's model is `tau * dy/dt + y = K * x(t)`.
 
@@ -74,14 +84,19 @@ Module 2 validation results:
 - Validation 2 (`tau = 0.2 s`, `omega = 2 rad/s`): `M = 0.92847669` and phase-lag magnitude `21.8014 degrees`.
 - Validation 3 (`f_max = 100 Hz`, `e = 5%`): `tau_max = 0.523117 ms` and phase-lag magnitude at `50 Hz = 9.3327 degrees`.
 
-To run all numerical checks with Node.js:
+Module 3 validation results:
+
+- Validation 4 (`zeta = 0.5`) gives 16.30% overshoot.
+- Validation 5 (`zeta = 1`) gives 0% overshoot.
+- Validation 6 (`m = 1, b = 2, k = 4`) gives eigenvalues and poles of approximately `-1 ± j1.732 s^-1`.
+
+Run all numerical checks with Node.js.
 
 ```sh
-node tests/first-order.test.cjs
-node tests/frequency-response.test.cjs
+node --test tests/*.test.cjs
 ```
 
-The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3.
+The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3. The Module 3 suite compares displacement and velocity against independent RK4 integration across all three regimes and checks the timing metrics, poles, and homework validations 4–6.
 
 ## File responsibilities
 
@@ -91,11 +106,14 @@ The Module 1 suite contains 470 numerical assertions. The Module 2 suite contain
 | `css/styles.css` | Shared styling and responsive layout |
 | `js/models/first-order.js` | Reusable equations, independent of the page and Plotly |
 | `js/models/frequency-response.js` | Pure frequency-response and design-limit equations |
+| `js/models/second-order.js` | Closed-form mass-spring-damper response, timing metrics, and eigenvalues |
 | `js/plotting.js` | Shared Plotly styling, rendering, and reset helpers |
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
 | `js/module2.js` | Module 2 controls, graphs, calculators, prediction, and validation |
+| `js/module3.js` | Module 3 sliders, plots, state-space panel, prediction, and validation |
 | `tests/first-order.test.cjs` | Independent Module 1 numerical verification |
 | `tests/frequency-response.test.cjs` | Module 2 equation and validation tests |
+| `tests/second-order.test.cjs` | Module 3 response, timing, and validation tests |
 
 ## Group members and module ownership
 
@@ -107,7 +125,7 @@ The Module 1 suite contains 470 numerical assertions. The Module 2 suite contain
 | --- | --- | --- |
 | Module 1 - first-order time response | Mohammad | Published |
 | Module 2 - first-order frequency response | Yanal | Implemented with interactive graphs, calculators, validations, and tests |
-| Module 3 - second-order response and state-space panel | Saif | Planned for Checkpoint 2 |
+| Module 3 - second-order response and state-space panel | Saif | Implemented with interactive plots, live matrices, validations, and tests |
 | Module 4 - Guess the Sensor challenge | Mohammad | Planned for the final release |
 
 ## Screenshots
@@ -116,6 +134,12 @@ The Module 1 suite contains 470 numerical assertions. The Module 2 suite contain
 
 ![Ramp response, lag, and error](docs/images/module1-ramp.jpg)
 
+![Second-order step response and live timing metrics](docs/images/module3-step.png)
+
+![State-space matrices, poles, eigenvalues, and phase trajectory](docs/images/module3-state.png)
+
 ## AI assistance
 
 AI assistance helped draft the interface and JavaScript, check equations, and prepare numerical tests. Module 2 reinforced the distinction between signed dynamic error and positive attenuation magnitude, the meaning of the `-3.01 dB` cutoff, and how `omega*tau` controls both amplitude and phase.
+
+For Module 3, AI assistance was used to implement the second-order model, controls, state-space plots, and numerical tests.

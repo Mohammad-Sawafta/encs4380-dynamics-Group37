@@ -150,3 +150,19 @@
       #frequency-wave-plot { height: 360px; }
       #bode-magnitude-plot, #bode-phase-plot { height: 320px; }
     }
+
+    .second-order-plot { width: 100%; height: 360px; }
+    .state-plot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .state-plot-grid figure { min-width: 0; }
+    .state-plot-grid h3 { margin: 0; font-size: 1rem; }
+    .state-matrices { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+    .state-matrices pre { margin: 0; padding: 8px 12px; border-radius: 6px; background: var(--tint); font-size: 0.875rem; }
+    .state-plot-grid .metrics dd { font-size: 0.95rem; }
+    #second-order-validation-rows th { white-space: normal; }
+
+    @media (max-width: 800px) {
+      .state-plot-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .second-order-plot { height: 320px; }
+    }

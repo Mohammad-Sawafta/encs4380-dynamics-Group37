@@ -3,25 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Explore first-order sensor time and frequency responses, Bode plots, phase lag, and dynamic error.">
+  <meta name="description" content="Explore first-order sensor dynamics and second-order mass-spring-damper step responses.">
   <title>Dynamic characteristics toolkit | Group 37</title>
   <link rel="stylesheet" href="css/styles.css">
   <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
   <script defer src="js/models/first-order.js"></script>
   <script defer src="js/models/frequency-response.js"></script>
+  <script defer src="js/models/second-order.js"></script>
   <script defer src="js/plotting.js"></script>
   <script defer src="js/module1.js"></script>
   <script defer src="js/module2.js"></script>
+  <script defer src="js/module3.js"></script>
 </head>
 <body>
   <main>
     <header>
       <div class="eyebrow">ENCS4380 · Group 37</div>
       <h1>Dynamic characteristics interactive toolkit</h1>
-      <p class="muted">Explore first-order sensor behavior in the time and frequency domains. Make a prediction, then investigate the equations visually.</p>
+      <p class="muted">Explore first-order sensor dynamics and second-order step responses. Make a prediction, then investigate the equations visually.</p>
       <nav class="module-nav" aria-label="Toolkit modules">
         <a href="#module1">Module 1 · Time response</a>
         <a href="#module2">Module 2 · Frequency response</a>
+        <a href="#module3">Module 3 · Second-order response</a>
       </nav>
     </header>
 
@@ -317,7 +320,120 @@
       </section>
     </section>
 
-    <footer>Group 37 · Modules 1 and 2 · Static GitHub Pages-compatible toolkit.</footer>
+    <section id="module3" class="module-section" aria-labelledby="second-order-heading">
+      <div class="module-heading">
+        <div class="eyebrow">Module 3 · Saif</div>
+        <h2 id="second-order-heading">Second-order step response</h2>
+        <p class="muted">Apply a 1 N force step to a mass-spring-damper at rest and watch its displacement and velocity change.</p>
+        <p class="formula">m ẍ + b ẋ + kx = F(t) &nbsp; · &nbsp; G(s) = 1/(ms² + bs + k)</p>
+      </div>
+
+      <section class="prediction-panel" aria-labelledby="second-order-prediction-heading">
+        <h2 id="second-order-prediction-heading">Predict, then check</h2>
+        <fieldset id="second-order-predictions" class="prediction-choices">
+          <legend>Starting from the default settings, what happens to overshoot when you increase b and keep m and k fixed?</legend>
+          <label class="choice"><input type="radio" name="second-order-prediction" value="decreases"> It decreases</label>
+          <label class="choice"><input type="radio" name="second-order-prediction" value="increases"> It increases</label>
+          <label class="choice"><input type="radio" name="second-order-prediction" value="same"> It stays the same</label>
+        </fieldset>
+        <p id="second-order-prediction-status" class="small muted" role="status">Choose a prediction to unlock the controls.</p>
+        <div class="prediction-actions">
+          <button id="second-order-check" type="button" disabled>Check prediction</button>
+          <button id="second-order-reset" class="secondary" type="button">Reset exercise and controls</button>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Mass-spring-damper experiment">
+        <div class="controls">
+          <h2>The experiment</h2>
+          <div class="control-heading">
+            <label for="second-order-mass">Mass m</label>
+            <output id="second-order-mass-value" for="second-order-mass">1.00 kg</output>
+          </div>
+          <input id="second-order-mass" type="range" min="0.5" max="3" step="0.05" value="1" disabled>
+          <div class="range-labels" aria-hidden="true"><span>0.5 kg</span><span>3 kg</span></div>
+          <div class="control-heading">
+            <label for="second-order-damping">Damping b</label>
+            <output id="second-order-damping-value" for="second-order-damping">2.00 N·s/m</output>
+          </div>
+          <input id="second-order-damping" type="range" min="0.5" max="12" step="0.05" value="2" disabled>
+          <div class="range-labels" aria-hidden="true"><span>0.5 N·s/m</span><span>12 N·s/m</span></div>
+          <div class="control-heading">
+            <label for="second-order-stiffness">Stiffness k</label>
+            <output id="second-order-stiffness-value" for="second-order-stiffness">4.00 N/m</output>
+          </div>
+          <input id="second-order-stiffness" type="range" min="1" max="10" step="0.05" value="4" disabled>
+          <div class="range-labels" aria-hidden="true"><span>1 N/m</span><span>10 N/m</span></div>
+          <label class="field-label" for="second-order-preset">Damping examples</label>
+          <select id="second-order-preset" disabled aria-describedby="second-order-preset-note">
+            <option value="" disabled>Custom settings</option>
+            <option value="2" selected>Underdamped</option>
+            <option value="4">Critically damped</option>
+            <option value="8">Overdamped</option>
+          </select>
+          <p class="control-note" id="second-order-preset-note">The examples use m = 1 kg and k = 4 N/m.</p>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-heading">
+            <h2>Displacement after the force step</h2>
+            <button id="second-order-reset-plots" class="secondary" type="button" disabled>Reset graph views</button>
+          </div>
+          <p id="second-order-chart-status" class="chart-status" role="status">Loading the graphs…</p>
+          <figure>
+            <div id="second-order-step-plot" class="second-order-plot" role="img" aria-label="Second-order step response with timing markers" aria-describedby="second-order-step-caption"></div>
+            <figcaption id="second-order-step-caption">Circles mark the first 10% and 90% crossings, the diamond marks the first peak when present, and the square marks the final entry into the shaded ±2% band.</figcaption>
+          </figure>
+          <p id="second-order-regime" class="cutoff-note"></p>
+          <dl class="metrics">
+            <div><dt>10–90% rise time</dt><dd id="second-order-rise">—</dd></div>
+            <div><dt>First peak time</dt><dd id="second-order-peak">—</dd></div>
+            <div><dt>Overshoot</dt><dd id="second-order-overshoot">—</dd></div>
+            <div><dt>±2% settling time</dt><dd id="second-order-settle">—</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="diagnostic-section" aria-labelledby="state-space-heading">
+        <h2 id="state-space-heading">State-space view</h2>
+        <p class="small muted">The state x contains displacement x₁ and velocity x₂. The output is displacement.</p>
+        <p class="formula">ẋ = Ax + BF(t) &nbsp; · &nbsp; y = [1 0] x</p>
+        <div class="state-matrices">
+          <pre id="second-order-matrix-a" aria-label="State matrix A"></pre>
+          <pre id="second-order-matrix-b" aria-label="Input vector B"></pre>
+        </div>
+        <div class="state-plot-grid">
+          <figure>
+            <h3>Poles and eigenvalues</h3>
+            <div id="second-order-poles-plot" class="second-order-plot" role="img" aria-label="Transfer-function poles and state matrix eigenvalues in the s-plane" aria-describedby="second-order-poles-caption"></div>
+            <figcaption id="second-order-poles-caption">Crosses are transfer-function poles. Open circles are eigenvalues of A. They overlap.</figcaption>
+            <dl class="metrics">
+              <div><dt>Transfer-function poles (s⁻¹)</dt><dd id="second-order-poles">—</dd></div>
+              <div><dt>Eigenvalues of A (s⁻¹)</dt><dd id="second-order-eigenvalues">—</dd></div>
+            </dl>
+          </figure>
+          <figure>
+            <h3>Phase plane</h3>
+            <div id="second-order-phase-plot" class="second-order-plot" role="img" aria-label="Velocity versus displacement during the step response" aria-describedby="second-order-phase-caption"></div>
+            <figcaption id="second-order-phase-caption">The path goes from rest at the open circle toward the new equilibrium at the diamond. Underdamping produces a spiral. Critical damping and overdamping approach equilibrium without circling.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="validation-section" aria-labelledby="second-order-validation-heading">
+        <h2 id="second-order-validation-heading">Homework validations 4–6</h2>
+        <p class="small muted">These checks use fixed reference systems and stay visible as you explore other slider settings.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th scope="col">Check</th><th scope="col">Expected</th><th scope="col">Calculated</th><th scope="col">Result</th></tr></thead>
+            <tbody id="second-order-validation-rows"></tbody>
+          </table>
+        </div>
+        <p class="tolerance">Overshoot tolerance is ±0.05 percentage points for ζ = 0.5. For the complex pair, each component allows a rounding error of 0.0005 s⁻¹, and the poles must agree with the eigenvalues to within 10⁻¹⁰ s⁻¹.</p>
+      </section>
+    </section>
+
+    <footer>Group 37 · Modules 1–3 · Static GitHub Pages-compatible toolkit.</footer>
   </main>
 </body>
 </html>
