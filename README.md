@@ -1,6 +1,6 @@
 # ENCS4380 Dynamic Characteristics Toolkit - Group 37
 
-An interactive toolkit for exploring sensor dynamics. Module 1 covers first-order step and ramp responses.
+An interactive toolkit for exploring sensor dynamics. Module 1 covers first-order step and ramp responses, and Module 2 covers first-order frequency response.
 
 **Live website:** [Open the Dynamic Characteristics Toolkit](https://mohammad-sawafta.github.io/encs4380-dynamics-Group37/).
 
@@ -16,6 +16,18 @@ The [source repository](https://github.com/Mohammad-Sawafta/encs4380-dynamics-Gr
 6. Read the expected values, calculated values, and pass/fail results.
 
 The step amplitude is A = 1 input unit. The ramp slope is r = 1 input unit per second. The initial output is zero. Time is measured in seconds, and the controls use positive gain and a positive time constant.
+
+## Use Module 2
+
+1. Choose a prediction about how increasing frequency changes amplitude and phase lag.
+2. Increase angular frequency `omega` while keeping `tau` fixed, then check the prediction.
+3. Compare the unit-amplitude input with the attenuated, phase-lagged steady-state output.
+4. Read `tau`, `omega`, frequency in hertz, amplitude ratio, and phase in degrees and radians.
+5. Inspect the current-frequency and cutoff markers on the logarithmic Bode plots.
+6. Use the dynamic-error and maximum-permissible-time-constant calculators.
+7. Review homework validations 2 and 3.
+
+Module 2 uses `K = 1`, so the actual output/input amplitude ratio equals the normalized ratio `M`. The sine-wave graph shows the steady-state response and excludes the startup transient.
 
 ## Equations and interpretation
 
@@ -34,8 +46,19 @@ The homework's model is `tau * dy/dt + y = K * x(t)`.
 | Asymptotic ramp time lag | `tau` |
 | Step error fraction | `epsilon = (K*A - y_step)/(K*A) = exp(-t/tau)` |
 | Natural log of step error | `ln(epsilon) = -t/tau` |
+| Frequency transfer function | `G(s) = K/(tau*s + 1)` |
+| Normalized amplitude ratio | `M = 1/sqrt(1 + (omega*tau)^2)` |
+| Phase shift | `phi = -atan(omega*tau)` |
+| Frequency conversion | `f = omega/(2*pi)` |
+| Bode magnitude | `20*log10(M)` dB |
+| Cutoff angular frequency | `omega_c = 1/tau` |
+| Signed frequency dynamic error | `delta = M - 1` |
+| Positive attenuation magnitude | `e = 1 - M = abs(delta)` |
+| Maximum permissible time constant | `tau_max = sqrt(1/(1-e)^2 - 1)/(2*pi*f_max)` |
 
 The ramp error compares the measured output with **K times the input**. Subtracting the raw input from the output would mix gain error with dynamic lag when K differs from 1. A ramp does not have a finite final output; its error approaches the steady-state value while both ideal and actual outputs keep increasing.
+
+For Module 2, `delta` is signed and is normally negative because a first-order sensor attenuates a sinusoid. The design limit uses the positive magnitude `e = 1 - M`. At cutoff, `M = 1/sqrt(2) = 0.7071`, magnitude is `-3.0103 dB`, and phase is `-45 degrees`.
 
 The logarithmic diagnostic uses a separate unit-step experiment at the current K and tau, even when the main graph shows a ramp. The slope `-1/tau` refers to **ln(epsilon)** versus physical time. A plot of `log10(epsilon)` would instead have slope `-1/(tau*ln(10))`.
 
@@ -46,17 +69,19 @@ Homework validation check 1 is shown on the page:
 - `y(tau) / (K*A) = 0.6321205588`, approximately 0.632.
 - `y(3*tau) / (K*A) = 0.9502129316`, approximately 0.95.
 
-The step checks allow an absolute difference of 0.0005 in the normalized fraction because the homework values are rounded. Expected output values scale with K*A. These remain explicitly labeled step checks when the main input is a ramp.
+Module 2 validation results:
 
-To run the independent numerical checks with Node.js:
+- Validation 2 (`tau = 0.2 s`, `omega = 2 rad/s`): `M = 0.92847669` and phase-lag magnitude `21.8014 degrees`.
+- Validation 3 (`f_max = 100 Hz`, `e = 5%`): `tau_max = 0.523117 ms` and phase-lag magnitude at `50 Hz = 9.3327 degrees`.
+
+To run all numerical checks with Node.js:
 
 ```sh
 node tests/first-order.test.cjs
+node tests/frequency-response.test.cjs
 ```
 
-The tests compare the closed-form step and ramp outputs against an independent RK4 integration of the governing differential equation. They also check non-unit gains and input sizes, the ramp-error identity and limit, the asymptotic lag, and the natural-log slope.
-
-All 470 numerical assertions passed. Browser checks covered controls, predictions, both diagnostic scales, graph resets, and desktop and phone-width layouts. The published website was also checked on a physical phone.
+The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3.
 
 ## File responsibilities
 
@@ -65,9 +90,12 @@ All 470 numerical assertions passed. Browser checks covered controls, prediction
 | `index.html` | Content, controls, graph containers, and script loading |
 | `css/styles.css` | Shared styling and responsive layout |
 | `js/models/first-order.js` | Reusable equations, independent of the page and Plotly |
+| `js/models/frequency-response.js` | Pure frequency-response and design-limit equations |
 | `js/plotting.js` | Shared Plotly styling, rendering, and reset helpers |
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
-| `tests/first-order.test.cjs` | Independent numerical verification |
+| `js/module2.js` | Module 2 controls, graphs, calculators, prediction, and validation |
+| `tests/first-order.test.cjs` | Independent Module 1 numerical verification |
+| `tests/frequency-response.test.cjs` | Module 2 equation and validation tests |
 
 ## Group members and module ownership
 
@@ -78,7 +106,7 @@ All 470 numerical assertions passed. Browser checks covered controls, prediction
 | Module | Owner | Status |
 | --- | --- | --- |
 | Module 1 - first-order time response | Mohammad | Published |
-| Module 2 - first-order frequency response | Yanal | Planned for Checkpoint 2 |
+| Module 2 - first-order frequency response | Yanal | Implemented with interactive graphs, calculators, validations, and tests |
 | Module 3 - second-order response and state-space panel | Saif | Planned for Checkpoint 2 |
 | Module 4 - Guess the Sensor challenge | Mohammad | Planned for the final release |
 
@@ -90,4 +118,4 @@ All 470 numerical assertions passed. Browser checks covered controls, prediction
 
 ## AI assistance
 
-AI assistance helped draft the interface and JavaScript, check equations, and prepare numerical tests.
+AI assistance helped draft the interface and JavaScript, check equations, and prepare numerical tests. Module 2 reinforced the distinction between signed dynamic error and positive attenuation magnitude, the meaning of the `-3.01 dB` cutoff, and how `omega*tau` controls both amplitude and phase.

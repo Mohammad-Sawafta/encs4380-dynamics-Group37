@@ -3,21 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Explore first-order sensor step and ramp responses, time lag, and logarithmic error diagnostics.">
-  <title>First-order time response | Group 37</title>
+  <meta name="description" content="Explore first-order sensor time and frequency responses, Bode plots, phase lag, and dynamic error.">
+  <title>Dynamic characteristics toolkit | Group 37</title>
   <link rel="stylesheet" href="css/styles.css">
   <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
   <script defer src="js/models/first-order.js"></script>
+  <script defer src="js/models/frequency-response.js"></script>
   <script defer src="js/plotting.js"></script>
   <script defer src="js/module1.js"></script>
+  <script defer src="js/module2.js"></script>
 </head>
 <body>
   <main>
     <header>
-      <div class="eyebrow">ENCS4380 · Group 37 · Module 1</div>
-      <h1>First-order time response</h1>
-      <p class="muted">Explore how a sensor follows a sudden change or a steadily rising input. Make a prediction, then investigate the response.</p>
+      <div class="eyebrow">ENCS4380 · Group 37</div>
+      <h1>Dynamic characteristics interactive toolkit</h1>
+      <p class="muted">Explore first-order sensor behavior in the time and frequency domains. Make a prediction, then investigate the equations visually.</p>
+      <nav class="module-nav" aria-label="Toolkit modules">
+        <a href="#module1">Module 1 · Time response</a>
+        <a href="#module2">Module 2 · Frequency response</a>
+      </nav>
     </header>
+
+    <div id="module1" class="module-heading">
+      <div class="eyebrow">Module 1 · Mohammad</div>
+      <h2>First-order time response</h2>
+      <p class="muted">Study step and ramp inputs, time lag, and logarithmic error diagnostics.</p>
+    </div>
 
     <section class="prediction-panel" aria-labelledby="prediction-heading">
       <h2 id="prediction-heading">Predict, then check</h2>
@@ -154,7 +166,158 @@
       <p class="tolerance">Slope tolerance: 10⁻⁹ s⁻¹. The two points are t = τ and t = 3τ.</p>
     </section>
 
-    <footer>Module 1 · Step and ramp responses with step-error diagnostics.</footer>
+    <section id="module2" class="module-section" aria-labelledby="frequency-heading">
+      <div class="module-heading">
+        <div class="eyebrow">Module 2 · Yanal</div>
+        <h2 id="frequency-heading">First-order frequency response</h2>
+        <p class="muted">See how a first-order sensor attenuates and delays a sinusoidal signal as frequency increases.</p>
+        <p class="formula">G(s) = K/(τs + 1) &nbsp; · &nbsp; M = 1/√(1 + (ωτ)<sup>2</sup>) &nbsp; · &nbsp; φ = −tan<sup>−1</sup>(ωτ)</p>
+      </div>
+
+      <section class="prediction-panel" aria-labelledby="frequency-prediction-heading">
+        <h2 id="frequency-prediction-heading">Predict, then check</h2>
+        <fieldset class="prediction-choices">
+          <legend>With τ fixed, what happens when the input angular frequency ω increases?</legend>
+          <label class="choice"><input type="radio" name="frequency-prediction" value="amplify-less-lag"> Amplitude increases and lag decreases</label>
+          <label class="choice"><input type="radio" name="frequency-prediction" value="attenuate-lag"> Amplitude decreases and lag increases</label>
+          <label class="choice"><input type="radio" name="frequency-prediction" value="unchanged"> Both remain unchanged</label>
+        </fieldset>
+        <p id="frequency-prediction-helper" class="small muted" role="status">Choose a prediction to unlock the frequency-response controls.</p>
+        <div class="prediction-actions">
+          <button id="frequency-check-prediction" type="button" disabled>Check prediction</button>
+          <button id="frequency-reset-exercise" class="secondary" type="button">Reset exercise and controls</button>
+        </div>
+        <p id="frequency-prediction-feedback" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="workspace" aria-label="First-order frequency-response explorer">
+        <div class="controls">
+          <h2>The experiment</h2>
+          <p class="control-note">The graph uses a unit-amplitude input and K = 1, so the actual output/input amplitude ratio equals the normalized ratio M.</p>
+
+          <div class="control-heading">
+            <label for="frequency-tau">Time constant τ</label>
+            <output id="frequency-tau-value" for="frequency-tau">0.20 s</output>
+          </div>
+          <input id="frequency-tau" type="range" min="0.01" max="2" step="0.01" value="0.20" disabled aria-describedby="frequency-tau-help" aria-valuetext="0.20 seconds">
+          <div class="range-labels" aria-hidden="true"><span>0.01 s</span><span>2.00 s</span></div>
+          <p id="frequency-tau-help" class="control-note">Larger τ moves the cutoff frequency lower.</p>
+
+          <div class="control-heading">
+            <label for="frequency-omega">Angular frequency ω</label>
+            <output id="frequency-omega-value" for="frequency-omega">2.0 rad/s</output>
+          </div>
+          <input id="frequency-omega" type="range" min="0.1" max="100" step="0.1" value="2.0" disabled aria-describedby="frequency-omega-help" aria-valuetext="2.0 radians per second">
+          <div class="range-labels" aria-hidden="true"><span>0.1 rad/s</span><span>100 rad/s</span></div>
+          <p id="frequency-omega-help" class="control-note">Drag the slider or focus it and use the arrow keys.</p>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-heading">
+            <h2>Steady-state input and output</h2>
+            <button id="frequency-reset-wave" class="secondary" type="button" disabled>Reset wave view</button>
+          </div>
+          <p class="small muted">x(t) = sin(ωt), &nbsp; y(t) = M sin(ωt + φ). This graph excludes the initial transient.</p>
+          <div id="frequency-chart-status" class="chart-status" role="status">
+            <span id="frequency-chart-message">Loading the frequency-response graphs…</span>
+            <button id="frequency-retry-charts" class="secondary" type="button" hidden>Reload graphs</button>
+          </div>
+          <figure>
+            <div id="frequency-wave-plot" role="img" aria-label="Steady-state input and output sine waves" aria-describedby="frequency-wave-summary"></div>
+            <figcaption id="frequency-wave-summary">Three periods are shown.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="frequency-metrics-section" aria-labelledby="frequency-values-heading">
+        <h2 id="frequency-values-heading">Live frequency-response values</h2>
+        <dl class="metrics metric-grid">
+          <div><dt>Time constant τ</dt><dd id="frequency-metric-tau">—</dd></div>
+          <div><dt>Angular frequency ω</dt><dd id="frequency-metric-omega">—</dd></div>
+          <div><dt>Frequency f</dt><dd id="frequency-metric-hz">—</dd></div>
+          <div><dt>Amplitude ratio M</dt><dd id="frequency-metric-ratio">—</dd></div>
+          <div><dt>Phase φ</dt><dd id="frequency-metric-degrees">—</dd></div>
+          <div><dt>Phase φ</dt><dd id="frequency-metric-radians">—</dd></div>
+        </dl>
+        <p class="small muted">As frequency rises, ωτ grows. The amplitude ratio decreases toward zero and the phase approaches −90°, so the sensor attenuates the signal more and lags further behind it.</p>
+      </section>
+
+      <section class="bode-section" aria-labelledby="bode-heading">
+        <div class="chart-heading">
+          <h2 id="bode-heading">Interactive Bode plots</h2>
+          <button id="frequency-reset-bode" class="secondary" type="button" disabled>Reset Bode views</button>
+        </div>
+        <p class="small muted">The orange marker is the current operating frequency. The purple diamond marks the cutoff frequency.</p>
+        <div class="bode-grid">
+          <figure>
+            <div id="bode-magnitude-plot" role="img" aria-label="Bode magnitude plot in decibels"></div>
+            <figcaption>Magnitude = 20 log<sub>10</sub>(M), with a logarithmic frequency axis.</figcaption>
+          </figure>
+          <figure>
+            <div id="bode-phase-plot" role="img" aria-label="Bode phase plot in degrees"></div>
+            <figcaption>Phase = −tan<sup>−1</sup>(ωτ), shown in degrees.</figcaption>
+          </figure>
+        </div>
+        <p id="frequency-cutoff-summary" class="cutoff-note">At cutoff, M = 0.7071, magnitude = −3.0103 dB, and phase = −45°.</p>
+        <p class="small muted">The cutoff ω<sub>c</sub> = 1/τ is the conventional bandwidth boundary: output amplitude has fallen to 1/√2 of its low-frequency value.</p>
+      </section>
+
+      <section class="frequency-calculators" aria-label="Frequency-response error calculators">
+        <div class="calculator-card">
+          <h2>Dynamic error at the current settings</h2>
+          <p class="formula">δ = M − 1 &nbsp; · &nbsp; e = 1 − M = |δ|</p>
+          <dl class="metrics">
+            <div><dt>Signed error δ</dt><dd id="frequency-error-signed">—</dd></div>
+            <div><dt>Signed error</dt><dd id="frequency-error-percent">—</dd></div>
+            <div><dt>Amplitude ratio M</dt><dd id="frequency-error-ratio">—</dd></div>
+          </dl>
+          <p id="frequency-error-explanation" class="small muted"></p>
+        </div>
+
+        <div class="calculator-card">
+          <h2>Maximum permissible time constant</h2>
+          <p class="small muted">Use a positive allowed attenuation magnitude e, not the signed error δ.</p>
+          <p class="formula">τ<sub>max</sub> = √(1/(1 − e)<sup>2</sup> − 1) / (2πf<sub>max</sub>)</p>
+          <div class="number-field-grid">
+            <label for="maximum-frequency">Maximum frequency f<sub>max</sub> (Hz)
+              <input id="maximum-frequency" type="number" min="0.001" step="1" value="100" inputmode="decimal">
+            </label>
+            <label for="allowed-error">Allowed error e (%)
+              <input id="allowed-error" type="number" min="0.001" max="99.999" step="0.1" value="5" inputmode="decimal">
+            </label>
+          </div>
+          <p id="maximum-tau-result" class="calculator-result" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="validation-section frequency-validation" aria-labelledby="frequency-validation-heading">
+        <h2 id="frequency-validation-heading">Homework validations 2 and 3</h2>
+        <p class="small muted">Every calculated value below comes from the same mathematical functions used by the graphs and calculators. Tolerances allow for the professor’s rounded expected values.</p>
+        <div class="table-scroll">
+          <table>
+            <caption>Validation 2 · τ = 0.2 s and ω = 2 rad/s</caption>
+            <thead><tr><th scope="col">Quantity</th><th scope="col">Expected</th><th scope="col">Calculated</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Amplitude ratio M</th><td id="validation2-ratio-expected">—</td><td id="validation2-ratio-calculated">—</td><td id="validation2-ratio-result">Waiting</td></tr>
+              <tr><th scope="row">Phase-lag magnitude</th><td id="validation2-phase-expected">—</td><td id="validation2-phase-calculated">—</td><td id="validation2-phase-result">Waiting</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <caption>Validation 3 · f<sub>max</sub> = 100 Hz and e = 5%</caption>
+            <thead><tr><th scope="col">Quantity</th><th scope="col">Expected</th><th scope="col">Calculated</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Maximum τ</th><td id="validation3-tau-expected">—</td><td id="validation3-tau-calculated">—</td><td id="validation3-tau-result">Waiting</td></tr>
+              <tr><th scope="row">Phase-lag magnitude at 50 Hz</th><td id="validation3-phase-expected">—</td><td id="validation3-phase-calculated">—</td><td id="validation3-phase-result">Waiting</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tolerance">Tolerances: M ±0.005, phase validation 2 ±0.05°, τ ±0.01 ms, phase validation 3 ±0.1°. The exact calculations agree with the rounded expected values.</p>
+      </section>
+    </section>
+
+    <footer>Group 37 · Modules 1 and 2 · Static GitHub Pages-compatible toolkit.</footer>
   </main>
 </body>
 </html>

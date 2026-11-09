@@ -113,3 +113,40 @@
       .formula { font-size: 1.08rem; }
       .table-scroll table { min-width: 320px; }
     }
+
+    /* Module navigation and Module 2 extend the established card-based design. */
+    .module-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .module-nav a { display: inline-block; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; color: var(--accent); background: var(--surface); font-size: 0.875rem; font-weight: 600; text-decoration: none; }
+    .module-nav a:hover { border-color: var(--accent); }
+    .module-heading { scroll-margin-top: 18px; margin: 4px 0 18px; }
+    .module-heading h2 { margin: 7px 0 5px; font-size: 1.55rem; }
+    .module-section { scroll-margin-top: 18px; margin-top: 56px; padding-top: 42px; border-top: 2px solid var(--line); }
+    #frequency-wave-plot { width: 100%; height: 430px; }
+    .frequency-metrics-section, .bode-section, .frequency-validation { margin-top: 32px; }
+    .frequency-metrics-section, .bode-section { padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .bode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; min-width: 0; }
+    .bode-grid figure { min-width: 0; }
+    #bode-magnitude-plot, #bode-phase-plot { width: 100%; height: 340px; }
+    .cutoff-note { max-width: none; margin: 20px 0 6px; padding: 12px 14px; border-left: 4px solid var(--purple); background: var(--tint); font-weight: 600; }
+    .frequency-calculators { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 32px; }
+    .calculator-card { padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .calculator-card .metrics { margin-bottom: 12px; }
+    .number-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .number-field-grid label { font-size: 0.875rem; font-weight: 600; }
+    input[type="number"] { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--surface); font: inherit; font-variant-numeric: tabular-nums; }
+    .calculator-result { max-width: none; margin-top: 18px; padding: 12px 14px; border-radius: 6px; background: var(--tint); font-variant-numeric: tabular-nums; }
+    .calculator-result.fail { background: color-mix(in oklch, var(--error) 10%, var(--surface)); }
+    .frequency-validation .table-scroll + .table-scroll { margin-top: 24px; }
+
+    @media (max-width: 900px) {
+      .bode-grid, .frequency-calculators { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 480px) {
+      .module-section { margin-top: 42px; padding-top: 32px; }
+      .frequency-metrics-section, .bode-section, .calculator-card { padding: 18px 14px; }
+      .metric-grid, .number-field-grid { grid-template-columns: 1fr; }
+      #frequency-wave-plot { height: 360px; }
+      #bode-magnitude-plot, #bode-phase-plot { height: 320px; }
+    }
