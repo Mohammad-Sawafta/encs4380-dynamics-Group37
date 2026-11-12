@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Explore first-order sensor dynamics and second-order mass-spring-damper step responses.">
+  <meta name="description" content="Explore first-order sensor dynamics, second-order step responses, and a Guess the Sensor parameter challenge.">
   <title>Dynamic characteristics toolkit | Group 37</title>
   <link rel="stylesheet" href="css/styles.css">
   <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
   <script defer src="js/models/first-order.js"></script>
   <script defer src="js/models/frequency-response.js"></script>
   <script defer src="js/models/second-order.js"></script>
+  <script defer src="js/models/sensor-challenge.js"></script>
   <script defer src="js/plotting.js"></script>
   <script defer src="js/module1.js"></script>
   <script defer src="js/module2.js"></script>
   <script defer src="js/module3.js"></script>
+  <script defer src="js/module4.js"></script>
 </head>
 <body>
   <main>
@@ -25,6 +27,7 @@
         <a href="#module1">Module 1 · Time response</a>
         <a href="#module2">Module 2 · Frequency response</a>
         <a href="#module3">Module 3 · Second-order response</a>
+        <a href="#module4">Module 4 · Guess the Sensor</a>
       </nav>
     </header>
 
@@ -433,7 +436,88 @@
       </section>
     </section>
 
-    <footer>Group 37 · Modules 1–3 · Static GitHub Pages-compatible toolkit.</footer>
+    <section id="module4" class="module-section" aria-labelledby="challenge-heading">
+      <div class="module-heading">
+        <div class="eyebrow">Module 4 · Mohammad</div>
+        <h2 id="challenge-heading">Guess the Sensor</h2>
+        <p class="muted">Read a noisy response, estimate two hidden parameters, then compare your prediction with the true sensor.</p>
+      </div>
+
+      <div class="challenge-round-header">
+        <div>
+          <p id="challenge-round-number" class="eyebrow">Round 1</p>
+          <h3 id="challenge-round-label">Preparing your sensor</h3>
+        </div>
+        <dl class="challenge-session" aria-label="Session progress">
+          <div><dt>Session points</dt><dd id="challenge-score">0 / 0</dd></div>
+          <div><dt>Completed rounds</dt><dd id="challenge-completed">0</dd></div>
+        </dl>
+      </div>
+      <p id="challenge-conditions" class="control-note">The input conditions will appear with the first response.</p>
+
+      <div class="workspace challenge-workspace">
+        <div class="chart-panel">
+          <div class="chart-heading">
+            <h3 id="challenge-graph-heading">Read the response</h3>
+            <button id="challenge-reset-view" type="button" class="secondary" disabled>Reset view</button>
+          </div>
+          <div id="challenge-graph-status" class="chart-status" role="status" aria-live="polite">
+            <span id="challenge-graph-message">Loading your response graph…</span>
+            <button id="challenge-retry" type="button" class="secondary" hidden>Retry graph</button>
+          </div>
+          <figure>
+            <div id="challenge-plot" role="img" aria-label="Noisy sensor response to estimate" aria-describedby="challenge-caption"></div>
+            <div id="challenge-legend" class="legend" aria-label="Response graph key"></div>
+            <figcaption id="challenge-caption">Inspect the measurements to estimate the sensor. The true curve appears after you check your guess.</figcaption>
+          </figure>
+        </div>
+
+        <form id="challenge-form" class="controls" novalidate aria-labelledby="challenge-form-heading">
+          <h3 id="challenge-form-heading">Predict, then check</h3>
+          <p class="control-note">Enter both estimates. One submission reveals this round's answer.</p>
+          <div class="challenge-field">
+            <label id="challenge-label-1" class="field-label" for="challenge-estimate-1">First parameter</label>
+            <input id="challenge-estimate-1" name="challenge-estimate-1" type="number" step="any" inputmode="decimal" autocomplete="off" required aria-describedby="challenge-help-1 challenge-error-1" aria-invalid="false">
+            <p id="challenge-help-1" class="control-note">Use the curve to estimate this parameter.</p>
+            <p id="challenge-error-1" class="challenge-field-error"></p>
+          </div>
+          <div class="challenge-field">
+            <label id="challenge-label-2" class="field-label" for="challenge-estimate-2">Second parameter</label>
+            <input id="challenge-estimate-2" name="challenge-estimate-2" type="number" step="any" inputmode="decimal" autocomplete="off" required aria-describedby="challenge-help-2 challenge-error-2" aria-invalid="false">
+            <p id="challenge-help-2" class="control-note">Use the curve to estimate this parameter.</p>
+            <p id="challenge-error-2" class="challenge-field-error"></p>
+          </div>
+          <div class="challenge-actions">
+            <button id="challenge-check" type="submit" disabled>Check my guess</button>
+            <button id="challenge-next" type="button" class="secondary" disabled>New sensor</button>
+          </div>
+          <p id="challenge-form-status" class="control-note" role="status" aria-live="polite">Your graph must load before you can check a guess.</p>
+          <button id="challenge-hint-button" type="button" class="secondary" aria-expanded="false" aria-controls="challenge-hint">Show hint</button>
+          <p id="challenge-hint" class="challenge-hint" hidden></p>
+        </form>
+      </div>
+
+      <p class="challenge-scoring-note">Earn 50 points for each estimate within 10% of its true value, up to 100 per round. Hints are free. Your session score stays as you visit other modules and resets when you reload the page.</p>
+
+      <section id="challenge-results" class="challenge-results" aria-labelledby="challenge-results-heading" hidden>
+        <div class="challenge-result-heading">
+          <h3 id="challenge-results-heading" tabindex="-1">Your prediction and the true sensor</h3>
+          <p id="challenge-round-score"></p>
+        </div>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Parameter comparison table">
+          <table>
+            <caption>Both parameters must be within 10% for full marks.</caption>
+            <thead>
+              <tr><th scope="col">Parameter</th><th scope="col">Your estimate</th><th scope="col">True value</th><th scope="col">Relative error</th><th scope="col">Result</th></tr>
+            </thead>
+            <tbody id="challenge-result-rows"></tbody>
+          </table>
+        </div>
+        <p id="challenge-explanation"></p>
+      </section>
+    </section>
+
+    <footer>Group 37 · Modules 1–4 · Static GitHub Pages-compatible toolkit.</footer>
   </main>
 </body>
 </html>
