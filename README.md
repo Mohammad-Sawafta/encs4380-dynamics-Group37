@@ -10,6 +10,58 @@ The [source repository](https://github.com/Mohammad-Sawafta/encs4380-dynamics-Gr
 
 To run the toolkit locally, serve this checkout with `python -m http.server 8765 --bind 127.0.0.1` and open [the local challenge](http://127.0.0.1:8765/#module4). If that local server is already running, open the link directly.
 
+## Homework 2: Control
+
+Open `control.html` using the **Control - PID playground** link on the landing page.
+P1 provides first-order and mass-spring-damper plants, live Kp/Ki/Kd controls,
+setpoint and actuator limits, a feedback diagram, output and control-effort
+graphs, response metrics, prediction feedback, and three homework validations.
+The P, PI, PID and unreachable-target presets give reproducible starting points.
+
+| Homework 2 module | Owner | Status |
+| --- | --- | --- |
+| P1 - PID playground | Mohammad | Implemented locally; publication pending |
+| P2 - Slow sensor in the loop | Saif | Assigned in the work plan; implementation pending |
+| P3 - Digital PID | To assign | Pending |
+| P4 - Tuning challenge | To assign | Pending |
+| My system - measured motor speed loop | To assign | Pending measurements and design |
+
+The simulation uses RK4 on the full plant/controller state. Both plant equations
+are preserved from Homework 1. The requested command is clipped before it
+drives the plant. Derivative action uses the measured output with a 0.02 s
+first-order filter, avoiding a setpoint kick. P1 intentionally has no anti-windup;
+P3 must add its own anti-windup and sampled-controller behavior.
+
+Rise time is the first 10-90% setpoint crossing interval. Overshoot and the 2%
+settling band also refer to the target, so a biased P-only output can be flat
+without being settled to the target. Metrics observe every integration step;
+crossing times are interpolated independently of the sparse plot samples.
+Shorten the display duration to inspect very fast responses on the plots.
+Timing metrics are undefined for a zero
+step. Error is estimated from the last 15% only if the output varies by at most
+`0.0001 * max(1, abs(setpoint))`; otherwise the page reports the final-window
+error separately. A finite simulation cannot guarantee future settling.
+
+`tests/pid-control.test.cjs` compares first-order P and PI against exact curves,
+second-order P against the existing mechanical model, checks signed/zero steps
+and actuator saturation, verifies smaller-step convergence for filtered D,
+and rejects invalid input or excessive numerical work.
+Regression checks cover fast responses across display durations and sample
+counts, overshoot peaks between plot samples, and final settling-band entry.
+
+The P1 review on 21 November checked the assignment requirements and fixed
+metrics that previously depended on plot sampling. Browser interaction and
+phone-layout verification remain pending: the review environment could not
+reach the local preview server.
+
+The [P1/P2 handoff](docs/plans/2026-11-21-pid-p1-p2-handoff.md) documents the
+shared functions, sensor-state extension and remaining submission tasks.
+Generic plants are examples, not measured micromouse motor parameters.
+
+AI assistance supported the P1 equations, implementation, numerical tests and
+handoff documentation. Each group member must understand and explain their
+own code and equations in the demo.
+
 ## Use Module 1
 
 1. Choose a prediction before moving the experiment controls.
