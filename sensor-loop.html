@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore how a slow sensor changes a PID feedback loop and can cause oscillation.">
+  <title>Slow sensor in the loop | Group 37</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/control.css">
+  <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
+  <script defer src="js/models/pid-control.js"></script>
+  <script defer src="js/models/pid-sensor.js"></script>
+  <script defer src="js/plotting.js"></script>
+  <script defer src="js/control-p2.js"></script>
+</head>
+<body>
+  <main id="control">
+    <header>
+      <a class="back-link" href="index.html">&larr; Dynamic characteristics toolkit</a>
+      <div class="eyebrow">Homework 2 &middot; Control &middot; P2 / Saif</div>
+      <h1>A slow sensor in the loop</h1>
+      <p class="muted">The plant may already have passed the target while a delayed sensor still reports that it is behind.</p>
+      <nav class="control-module-nav" aria-label="Control modules">
+        <a href="control.html">P1 &middot; PID playground</a>
+        <a href="sensor-loop.html" aria-current="page">P2 &middot; Slow sensor</a>
+      </nav>
+      <div class="pid-presets" role="group" aria-label="Sensor-lag examples">
+        <button type="button" data-sensor-preset="ideal" class="secondary">01 &nbsp; Ideal sensor</button>
+        <button type="button" data-sensor-preset="small">02 &nbsp; Small lag</button>
+        <button type="button" data-sensor-preset="near" class="secondary">03 &nbsp; Near oscillation</button>
+        <button type="button" data-sensor-preset="unstable" class="secondary">04 &nbsp; Growing oscillation</button>
+      </div>
+      <p id="sensor-example-note" class="small muted">Small lag: the sensor follows the plant, but late enough to increase overshoot.</p>
+    </header>
+
+    <section class="prediction-panel" aria-labelledby="sensor-prediction-heading">
+      <h2 id="sensor-prediction-heading">Predict, then check</h2>
+      <fieldset class="prediction-choices">
+        <legend>Keep Kp = 2 and Ki = 8 fixed. What happens as sensor tau_s grows?</legend>
+        <label class="choice"><input type="radio" name="sensor-prediction" value="calmer"> The true output becomes calmer</label>
+        <label class="choice"><input type="radio" name="sensor-prediction" value="lag"> Overshoot grows and the loop can oscillate</label>
+        <label class="choice"><input type="radio" name="sensor-prediction" value="same"> Nothing changes because the plant is unchanged</label>
+      </fieldset>
+      <div class="prediction-actions">
+        <button id="sensor-check" type="button" disabled>Check prediction and compare</button>
+        <button id="sensor-reset-prediction" type="button" class="secondary">Reset prediction</button>
+      </div>
+      <p id="sensor-feedback" class="small" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="pid-loop" aria-labelledby="sensor-loop-heading">
+      <h2 id="sensor-loop-heading">Where the delay enters</h2>
+      <svg viewBox="0 0 820 185" role="img" aria-labelledby="sensor-diagram-title sensor-diagram-desc">
+        <title id="sensor-diagram-title">Negative-feedback PID loop with a sensor in the feedback path</title>
+        <desc id="sensor-diagram-desc">The PID drives the plant from the setpoint error. The true plant output passes through a first-order sensor before returning as the measured feedback. The controller sees only the measured output.</desc>
+        <defs><marker id="sensor-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#28634e"/></marker></defs>
+        <g fill="none" stroke="#28634e" stroke-width="2" marker-end="url(#sensor-arrow)">
+          <path d="M 45 60 H 103"/><path d="M 147 60 H 205"/><path d="M 315 60 H 370"/>
+          <path d="M 480 60 H 540"/><path d="M 650 60 H 790"/><path d="M 735 60 V 132 H 590"/>
+          <path d="M 500 156 H 125 V 83"/>
+        </g>
+        <g fill="#eef5ef" stroke="#28634e" stroke-width="2"><circle cx="125" cy="60" r="22"/>
+          <rect x="205" y="36" width="110" height="48" rx="8"/><rect x="370" y="36" width="110" height="48" rx="8"/>
+          <rect x="540" y="36" width="110" height="48" rx="8"/><rect x="500" y="132" width="90" height="48" rx="8"/></g>
+        <g fill="#233e32" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="16">
+          <text x="22" y="66">r</text><text x="125" y="66">&Sigma;</text><text x="175" y="45">e</text>
+          <text x="260" y="66">PID</text><text x="425" y="66">Limit</text><text x="595" y="66">Plant</text>
+          <text x="545" y="162">Sensor</text><text x="690" y="48">true y</text><text x="320" y="177">measured y_s</text>
+          <text x="95" y="49">+</text><text x="143" y="101">&minus;</text>
+        </g>
+      </svg>
+      <p class="small muted">Sensor equation: tau_s y_s' + y_s = y. The PID error is e = r - y_s, never r - y.</p>
+    </section>
+
+    <section class="workspace pid-workspace" aria-label="Slow-sensor feedback experiment">
+      <form id="sensor-form" class="controls" novalidate>
+        <h2>The experiment</h2>
+        <label class="field-label" for="sensor-plant">Plant model</label>
+        <select id="sensor-plant"><option value="first">First order (Module 1)</option><option value="second">Mass-spring-damper (Module 3)</option></select>
+        <div id="sensor-first-fields" class="number-field-grid">
+          <label for="sensor-gain">Gain K<input id="sensor-gain" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+          <label for="sensor-tau">Plant tau (s)<input id="sensor-tau" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+        </div>
+        <div id="sensor-second-fields" class="number-field-grid" hidden>
+          <label for="sensor-mass">m (kg)<input id="sensor-mass" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+          <label for="sensor-damping">b (N s/m)<input id="sensor-damping" type="number" value="2" min="0.1" max="10" step="0.1" required></label>
+          <label for="sensor-stiffness">k (N/m)<input id="sensor-stiffness" type="number" value="4" min="0.1" max="20" step="0.1" required></label>
+        </div>
+        <p id="sensor-equation" class="small pid-equation">tau y' + y = K u</p>
+
+        <div class="sensor-tau-control">
+          <div class="control-heading"><label for="sensor-sensorTau">Sensor tau_s</label><input id="sensor-sensorTau" type="number" min="0" max="2" step="0.01" value="0.1" required></div>
+          <input id="sensor-sensorTau-slider" type="range" min="0" max="1" step="0.01" value="0.1" aria-label="Sensor time constant slider">
+          <div class="range-labels" aria-hidden="true"><span>0 s &middot; ideal</span><span>1 s &middot; slow</span></div>
+        </div>
+        <div id="sensor-gain-controls"></div>
+        <div class="number-field-grid">
+          <label for="sensor-setpoint">Setpoint step<input id="sensor-setpoint" type="number" value="1" min="-5" max="5" step="0.1" required></label>
+          <label for="sensor-duration">Duration (s)<input id="sensor-duration" type="number" value="20" min="1" max="60" step="1" required></label>
+          <label for="sensor-uMin">Lower u limit<input id="sensor-uMin" type="number" value="-100" min="-100" max="100" step="0.1" required></label>
+          <label for="sensor-uMax">Upper u limit<input id="sensor-uMax" type="number" value="100" min="-100" max="100" step="0.1" required></label>
+        </div>
+        <p class="control-note">The example uses wide actuator limits so sensor lag, rather than clipping, causes the change. P1 explains saturation.</p>
+        <p id="sensor-input-error" role="alert" class="fail"></p>
+      </form>
+
+      <div class="chart-panel">
+        <div class="chart-heading"><h2>True output versus sensor report</h2><button id="sensor-reset-view" type="button" class="secondary">Reset plots</button></div>
+        <p id="sensor-status" class="pid-status small" role="status" aria-live="polite">Running simulation...</p>
+        <div id="sensor-chart-error" class="chart-status error" role="alert" hidden>Graphs could not load. Numerical results remain available. <button id="sensor-retry" type="button" class="secondary">Retry graphs</button></div>
+        <figure><div id="sensor-output-plot" class="pid-plot sensor-output-plot" role="img" aria-label="True plant output, sensor report, and target over time"></div>
+          <figcaption>Green: true output y. Orange: sensor report y_s, the only output the controller sees. Dashed purple: setpoint r.</figcaption></figure>
+        <dl class="metrics pid-metrics" aria-label="Live response metrics">
+          <div><dt>True-output rise time</dt><dd id="sensor-rise">&mdash;</dd></div>
+          <div><dt>True-output overshoot</dt><dd id="sensor-overshoot">&mdash;</dd></div>
+          <div><dt>True-output settling</dt><dd id="sensor-settling">&mdash;</dd></div>
+          <div><dt>Largest sensor gap |y - y_s|</dt><dd id="sensor-gap">&mdash;</dd></div>
+        </dl>
+        <p id="sensor-metric-note" class="small muted"></p>
+        <h2>Control effort</h2>
+        <figure><div id="sensor-control-plot" class="pid-plot pid-effort-plot" role="img" aria-label="Applied PID control over time"></div>
+          <figcaption>The control signal is calculated from r - y_s. A delayed report lets the controller keep pushing after the true output has passed the target.</figcaption></figure>
+      </div>
+    </section>
+
+    <details class="pid-method">
+      <summary>Equations, solver, and what to look for</summary>
+      <p>The sensor state obeys y_s' = (y - y_s) / tau_s. At every RK4 stage, the PID receives y_s, calculates e = r - y_s, and its clipped command drives the original plant. Plant, sensor, integral, and derivative-filter states are integrated together. The solver step bound includes the sensor rate 1 / tau_s.</p>
+      <p>At tau_s = 0, the sensor is bypassed algebraically instead of dividing by zero. That case calls the P1 simulation directly and reproduces its output, measurement, and control arrays exactly.</p>
+      <p>For the first-order example with Kp = 2 and Ki = 8, increasing tau_s adds phase lag. The sensor says the output is still low after the plant has crossed the target, so the PID continues to push. Overshoot grows; near tau_s = 0.6 s the oscillations stop decaying, and beyond it they grow.</p>
+    </details>
+    <footer>Group 37 &middot; P1: Mohammad &middot; P2: Saif &middot; Browser-only RK4 simulation</footer>
+    <noscript><p class="fail">Enable JavaScript to run the live sensor-loop experiment.</p></noscript>
+  </main>
+</body>
+</html>

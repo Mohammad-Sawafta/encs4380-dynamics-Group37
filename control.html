@@ -19,6 +19,10 @@
       <div class="eyebrow">Homework 2 &middot; Control &middot; P1 / Mohammad</div>
       <h1>PID playground</h1>
       <p class="muted">Give a system a target. Watch feedback change its speed, accuracy, and control effort.</p>
+      <nav class="control-module-nav" aria-label="Control modules">
+        <a href="control.html" aria-current="page">P1 &middot; PID playground</a>
+        <a href="sensor-loop.html">P2 &middot; Slow sensor</a>
+      </nav>
       <div class="pid-presets" role="group" aria-label="Controller examples">
         <button type="button" data-preset="p" class="secondary">01 &nbsp; P: faster, with error</button>
         <button type="button" data-preset="pi">02 &nbsp; PI: remove the error</button>
@@ -120,7 +124,7 @@
       <p>Metrics use every integration step, independently of the fewer points drawn on the graphs. Shorten the duration to inspect very fast responses on the plots. Rise time uses the first 10% and 90% setpoint crossings, interpolated between integration steps. Overshoot is excess beyond the setpoint, normalized by its magnitude; negative steps use the direction of the step. Settling uses the final entry into the 2% target band and requires at least 5% of the simulation (or 0.1 s) inside afterward. Finite simulations cannot guarantee future settling.</p>
       <p>A steady-state error is estimated only when the last 15% of output varies by at most 0.0001 &times; max(1, |r|). Otherwise the end-of-window error is shown separately. A zero step has no normalized timing or overshoot metrics. Increase the duration to inspect slow or oscillating responses.</p>
     </details>
-    <footer>Group 37 &middot; P1: Mohammad &middot; P2: Saif (planned) &middot; Browser-only simulation</footer>
+    <footer>Group 37 &middot; P1: Mohammad &middot; P2: Saif &middot; Browser-only simulation</footer>
     <noscript><p class="fail">Enable JavaScript to run the live PID experiment.</p></noscript>
   </main>
 </body>

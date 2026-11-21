@@ -12,16 +12,22 @@ To run the toolkit locally, serve this checkout with `python -m http.server 8765
 
 ## Homework 2: Control
 
-Open `control.html` using the **Control - PID playground** link on the landing page.
+Open `control.html` and `sensor-loop.html` using the two **Control** links on the landing page.
 P1 provides first-order and mass-spring-damper plants, live Kp/Ki/Kd controls,
 setpoint and actuator limits, a feedback diagram, output and control-effort
 graphs, response metrics, prediction feedback, and three homework validations.
 The P, PI, PID and unreachable-target presets give reproducible starting points.
 
+P2 inserts a first-order sensor in the feedback path. It plots true output,
+sensor-reported output and setpoint together, while the controller uses only the
+sensor report. Four presets move from ideal feedback through growing lag to an
+unstable oscillation without changing the PID gains. The ideal `tau_s = 0` case
+bypasses the sensor algebraically and reproduces P1 exactly.
+
 | Homework 2 module | Owner | Status |
 | --- | --- | --- |
-| P1 - PID playground | Mohammad | Implemented locally; publication pending |
-| P2 - Slow sensor in the loop | Saif | Assigned in the work plan; implementation pending |
+| P1 - PID playground | Mohammad | Implemented |
+| P2 - Slow sensor in the loop | Saif | Implemented |
 | P3 - Digital PID | To assign | Pending |
 | P4 - Tuning challenge | To assign | Pending |
 | My system - measured motor speed loop | To assign | Pending measurements and design |
@@ -49,10 +55,19 @@ and rejects invalid input or excessive numerical work.
 Regression checks cover fast responses across display durations and sample
 counts, overshoot peaks between plot samples, and final settling-band entry.
 
+`tests/pid-sensor.test.cjs` verifies the sensor differential equation against an
+independent RK4 reference, proves the zero-lag bypass is identical to P1, checks
+that sensor lag increases overshoot and produces growing oscillation, and covers
+second-order plants, saturation, invalid input, and solver-step convergence.
+
 The P1 review on 21 November checked the assignment requirements and fixed
 metrics that previously depended on plot sampling. Browser interaction and
 phone-layout verification remain pending: the review environment could not
 reach the local preview server.
+
+The P2 review on 21 November exercised every preset and the prediction flow in
+a real browser, confirmed both Plotly graphs render without console errors, and
+checked desktop and narrow phone layouts for horizontal overflow.
 
 The [P1/P2 handoff](docs/plans/2026-11-21-pid-p1-p2-handoff.md) documents the
 shared functions, sensor-state extension and remaining submission tasks.
@@ -188,7 +203,7 @@ node --test tests/*.test.cjs
 
 The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3. The Module 3 suite compares displacement and velocity against independent RK4 integration across all three regimes and checks the timing metrics, poles, and homework validations 4–6.
 
-The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 12 numerical test groups across the toolkit pass.
+The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 28 Node test cases reported across the toolkit pass.
 
 Local Chrome verification passed 52 browser checks covering all three challenge types, hidden answers, invalid inputs, 0/50/100 scoring, repeated submission, new rounds, graph loading and rendering recovery, keyboard navigation, 360-pixel layout, and the existing modules' prediction interactions and six homework validations. Desktop and phone screenshots were visually reviewed.
 
@@ -202,15 +217,21 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/models/frequency-response.js` | Pure frequency-response and design-limit equations |
 | `js/models/second-order.js` | Closed-form mass-spring-damper response, timing metrics, and eigenvalues |
 | `js/models/sensor-challenge.js` | Pure sensor generation, fixed noise, response adaptation, input validation, scoring, and session state |
+| `js/models/pid-control.js` | Continuous PID, plant integration, saturation, and response metrics for P1 |
+| `js/models/pid-sensor.js` | First-order sensor state inside the PID feedback loop for P2 |
 | `js/plotting.js` | Shared Plotly styling, rendering, and reset helpers |
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
 | `js/module2.js` | Module 2 controls, graphs, calculators, prediction, and validation |
 | `js/module3.js` | Module 3 sliders, plots, state-space panel, prediction, and validation |
 | `js/module4.js` | Module 4 estimates, hints, reveal graphs, recovery, and session feedback |
+| `js/control-p1.js` | P1 controls, presets, plots, metrics, and validation display |
+| `js/control-p2.js` | P2 sensor-lag controls, presets, plots, prediction, and diagnostics |
 | `tests/first-order.test.cjs` | Independent Module 1 numerical verification |
 | `tests/frequency-response.test.cjs` | Module 2 equation and validation tests |
 | `tests/second-order.test.cjs` | Module 3 response, timing, and validation tests |
 | `tests/sensor-challenge.test.cjs` | Module 4 generation, numerical, scoring, and session tests |
+| `tests/pid-control.test.cjs` | P1 analytical comparisons, metrics, saturation, and convergence tests |
+| `tests/pid-sensor.test.cjs` | P2 sensor dynamics, lag, oscillation, and bypass tests |
 
 ## Group members and module ownership
 
@@ -224,6 +245,8 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | Module 2 - first-order frequency response | Yanal | Implemented with interactive graphs, calculators, validations, and tests |
 | Module 3 - second-order response and state-space panel | Saif | Implemented with interactive plots, live matrices, validations, and tests |
 | Module 4 - Guess the Sensor challenge | Mohammad | Implemented with random sensors, hints, scoring, reveal overlays, and tests |
+| Homework 2 P1 - PID playground | Mohammad | Implemented with continuous PID, actuator limits, metrics, and tests |
+| Homework 2 P2 - slow sensor in the loop | Saif | Implemented with delayed feedback, oscillation presets, and tests |
 
 ## Screenshots
 
@@ -244,3 +267,6 @@ AI assistance helped draft the interface and JavaScript, check equations, and pr
 For Module 3, AI assistance was used to implement the second-order model, controls, state-space plots, and numerical tests.
 
 For Module 4, AI assistance supported the approved requirements, challenge implementation, and numerical checks. The work reinforced estimating gain and time constant from amplitude and lag, normalizing the second-order final value, and scoring parameter error independently of measurement noise.
+
+For Homework 2 P2, AI assistance supported the coupled plant-sensor-PID RK4
+model, the slow-sensor teaching interaction, and numerical regression tests.

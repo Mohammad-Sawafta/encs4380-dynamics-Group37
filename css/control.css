@@ -1,6 +1,10 @@
 /* P1 extends the shared Homework 1 palette and cards. */
 #control .back-link { display: inline-block; color: var(--accent); margin-bottom: 20px; }
 #control .pid-presets { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 12px; }
+#control .control-module-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+#control .control-module-nav a { border: 1px solid var(--line); border-radius: 999px; color: var(--accent); padding: 8px 13px; text-decoration: none; }
+#control .control-module-nav a[aria-current="page"] { background: var(--accent-soft); border-color: var(--accent); font-weight: 700; }
+#control .sensor-tau-control { border-bottom: 1px solid var(--line); margin-bottom: 16px; padding-bottom: 16px; }
 #control .pid-loop { margin: 24px 0; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
 #control .pid-loop svg { display: block; width: 100%; max-width: 800px; margin: 4px auto 18px; }
 #control .pid-loop p { margin: auto; text-align: center; }

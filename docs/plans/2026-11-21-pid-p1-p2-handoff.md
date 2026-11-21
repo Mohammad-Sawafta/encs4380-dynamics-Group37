@@ -1,5 +1,10 @@
 # Homework 2: P1 implementation and P2 handoff
 
+P2 completion update, 21 November: `sensor-loop.html`, `js/control-p2.js`,
+`js/models/pid-sensor.js`, and `tests/pid-sensor.test.cjs` implement this handoff.
+The zero-lag bypass matches P1 exactly; lag and growing-oscillation presets,
+desktop/phone browser checks, and the full numerical suite pass.
+
 Owner of P1: Mohammad. Owner of P2: Saif. P3, P4 and My system still need owners.
 Source: ENCS4380 Homework 2 PID Control Toolkit, released 16 November 2026.
 Final release v2.0 and Pages link due 23 November 2026. P1/P2 checkpoint was 19 November.
