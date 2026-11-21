@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore PID feedback, actuator limits, and live step-response metrics.">
+  <title>PID playground | Group 37</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/control.css">
+  <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
+  <script defer src="js/models/pid-control.js"></script>
+  <script defer src="js/plotting.js"></script>
+  <script defer src="js/control-p1.js"></script>
+</head>
+<body>
+  <main id="control">
+    <header>
+      <a class="back-link" href="index.html">&larr; Dynamic characteristics toolkit</a>
+      <div class="eyebrow">Homework 2 &middot; Control &middot; P1 / Mohammad</div>
+      <h1>PID playground</h1>
+      <p class="muted">Give a system a target. Watch feedback change its speed, accuracy, and control effort.</p>
+      <div class="pid-presets" role="group" aria-label="Controller examples">
+        <button type="button" data-preset="p" class="secondary">01 &nbsp; P: faster, with error</button>
+        <button type="button" data-preset="pi">02 &nbsp; PI: remove the error</button>
+        <button type="button" data-preset="pid" class="secondary">03 &nbsp; PID: damp the motion</button>
+        <button type="button" data-preset="limit" class="secondary">04 &nbsp; An unreachable target</button>
+      </div>
+      <p id="pid-example-note" class="small muted">Start with a first-order plant and PI control. Change one gain at a time.</p>
+    </header>
+    <section class="prediction-panel" aria-labelledby="pid-prediction-heading">
+      <h2 id="pid-prediction-heading">Predict, then check</h2>
+      <fieldset class="prediction-choices">
+        <legend>For K = 1, tau = 1 and P-only control without clipping, increasing Kp from 1 to 9 will...</legend>
+        <label class="choice"><input type="radio" name="pid-prediction" value="zero"> Remove all steady-state error</label>
+        <label class="choice"><input type="radio" name="pid-prediction" value="faster"> Speed up the response and reduce, but retain, error</label>
+        <label class="choice"><input type="radio" name="pid-prediction" value="slower"> Slow the response</label>
+      </fieldset>
+      <div class="prediction-actions">
+        <button id="pid-check" type="button" disabled>Check prediction and show P example</button>
+        <button id="pid-reset-prediction" type="button" class="secondary">Reset prediction</button>
+      </div>
+      <p id="pid-feedback" class="small" role="status" aria-live="polite"></p>
+    </section>
+    <section class="pid-loop" aria-labelledby="pid-loop-heading">
+      <h2 id="pid-loop-heading">The feedback loop</h2>
+      <svg viewBox="0 0 760 165" role="img" aria-labelledby="pid-diagram-title pid-diagram-desc">
+        <title id="pid-diagram-title">Negative-feedback PID loop with actuator saturation</title>
+        <desc id="pid-diagram-desc">Setpoint minus measured output produces error. PID calculates a command, the actuator clips it, and the plant produces output. The output returns along the negative feedback path.</desc>
+        <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#28634e"/></marker></defs>
+        <g fill="none" stroke="#28634e" stroke-width="2" marker-end="url(#arrow)">
+          <path d="M 55 62 H 113"/><path d="M 157 62 H 220"/><path d="M 330 62 H 390"/>
+          <path d="M 500 62 H 560"/><path d="M 670 62 H 740"/><path d="M 705 64 V 134 H 135 V 85"/>
+        </g>
+        <g fill="#eef5ef" stroke="#28634e" stroke-width="2"><circle cx="135" cy="62" r="22"/>
+          <rect x="220" y="38" width="110" height="48" rx="8"/><rect x="390" y="38" width="110" height="48" rx="8"/><rect x="560" y="38" width="110" height="48" rx="8"/></g>
+        <g fill="#233e32" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="17">
+          <text x="27" y="68">r</text><text x="135" y="68">&Sigma;</text><text x="178" y="47">e</text>
+          <text x="275" y="68">PID</text><text x="445" y="68">Limit</text><text x="615" y="68">Plant</text>
+          <text x="530" y="47">u</text><text x="714" y="47">y</text><text x="103" y="51">+</text><text x="153" y="104">&minus;</text>
+          <text x="425" y="158">Measured output = true output (P1)</text>
+        </g>
+      </svg>
+      <p class="small muted">P reacts to current error. I accumulates error. D reacts to output motion and can add damping.</p>
+    </section>
+    <section class="workspace pid-workspace" aria-label="PID experiment">
+      <form id="pid-form" class="controls" novalidate>
+        <h2>The experiment</h2>
+        <label class="field-label" for="pid-plant">Plant model</label>
+        <select id="pid-plant"><option value="first">First order (Module 1)</option><option value="second">Mass-spring-damper (Module 3)</option></select>
+        <div id="pid-first-fields" class="number-field-grid">
+          <label for="pid-gain">Gain K<input id="pid-gain" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+          <label for="pid-tau">tau (s)<input id="pid-tau" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+        </div>
+        <div id="pid-second-fields" class="number-field-grid" hidden>
+          <label for="pid-mass">m (kg)<input id="pid-mass" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+          <label for="pid-damping">b (N s/m)<input id="pid-damping" type="number" value="2" min="0.1" max="10" step="0.1" required></label>
+          <label for="pid-stiffness">k (N/m)<input id="pid-stiffness" type="number" value="4" min="0.1" max="20" step="0.1" required></label>
+        </div>
+        <p id="pid-equation" class="small pid-equation">tau y' + y = K u</p>
+        <div id="pid-gain-controls"></div>
+        <div class="number-field-grid">
+          <label for="pid-setpoint">Setpoint step<input id="pid-setpoint" type="number" value="1" min="-5" max="5" step="0.1" required></label>
+          <label for="pid-duration">Duration (s)<input id="pid-duration" type="number" value="12" min="1" max="60" step="1" required></label>
+          <label for="pid-uMin">Lower u limit<input id="pid-uMin" type="number" value="-10" min="-100" max="100" step="0.1" required></label>
+          <label for="pid-uMax">Upper u limit<input id="pid-uMax" type="number" value="10" min="-100" max="100" step="0.1" required></label>
+        </div>
+        <p class="control-note">Generic control units; second-order input is force in N. Real motor PWM limits and measured K, tau belong in the My system application.</p>
+        <p id="pid-input-error" role="alert" class="fail"></p>
+      </form>
+      <div class="chart-panel">
+        <div class="chart-heading"><h2>Response to your target</h2><button id="pid-reset-view" type="button" class="secondary">Reset plots</button></div>
+        <p id="pid-status" class="pid-status small" role="status" aria-live="polite">Running simulation...</p>
+        <div id="pid-chart-error" class="chart-status error" role="alert" hidden>Graphs could not load. Numerical results remain available. <button id="pid-retry" type="button" class="secondary">Retry graphs</button></div>
+        <figure><div id="pid-output-plot" class="pid-plot" role="img" aria-label="Plant output and target over time"></div>
+          <figcaption>Green: output y. Dashed purple: setpoint r. Shaded band: &plusmn;2% of the setpoint magnitude.</figcaption></figure>
+        <dl class="metrics pid-metrics" aria-label="Live response metrics">
+          <div><dt>Rise time &middot; 10&ndash;90% target</dt><dd id="pid-rise">&mdash;</dd></div>
+          <div><dt>Overshoot above target</dt><dd id="pid-overshoot">&mdash;</dd></div>
+          <div><dt>Settling &middot; &plusmn;2% target</dt><dd id="pid-settling">&mdash;</dd></div>
+          <div><dt>Steady-state error estimate</dt><dd id="pid-error">&mdash;</dd></div>
+        </dl>
+        <p id="pid-metric-note" class="small muted"></p>
+        <h2>Control effort</h2>
+        <figure><div id="pid-control-plot" class="pid-plot pid-effort-plot" role="img" aria-label="Requested and applied control with actuator limits"></div>
+          <figcaption>Green: applied u. Dotted orange: requested command. Dashed red: actuator limits. Only the clipped command drives the plant.</figcaption></figure>
+      </div>
+    </section>
+    <section class="validation-section" aria-labelledby="pid-validation-heading">
+      <h2 id="pid-validation-heading">Homework validation checks</h2>
+      <p class="small muted">Independent reference cases with K = 1, tau = 1 and inactive clipping. These run separately from your current experiment.</p>
+      <div class="table-scroll"><table><caption>Numerical simulation against known results</caption>
+        <thead><tr><th scope="col">Case</th><th scope="col">Expected</th><th scope="col">Calculated</th><th scope="col">Result</th></tr></thead>
+        <tbody id="pid-validation-rows"></tbody></table></div>
+      <p class="tolerance">Curve and final-error tolerance: 10<sup>&minus;6</sup>. For PI, tau s&sup2; + (1 + K Kp)s + K Ki gives wn = sqrt(K Ki / tau) and zeta = (1 + K Kp) / (2 sqrt(tau K Ki)). Zero step error requires a stable loop and a reachable target.</p>
+    </section>
+    <details class="pid-method">
+      <summary>Equations, measurement rules, and limits</summary>
+      <p>At every RK4 stage, e = r &minus; y, I' = e, and u = clamp(Kp e + Ki I &minus; Kd (y &minus; z) / Tf). The derivative filter is z' = (y &minus; z) / Tf with Tf = 0.02 s. When Ki or Kd is zero its unused state is frozen. All states start at zero.</p>
+      <p>The derivative acts on measured output, avoiding a kick from the setpoint step. The time step is limited using the plant and controller rates; plot sampling is separate from integration. This is a continuous-controller simulation, not P3's sampled Arduino controller. P1 has no anti-windup: a saturated integral controller can keep accumulating error.</p>
+      <p>Metrics use every integration step, independently of the fewer points drawn on the graphs. Shorten the duration to inspect very fast responses on the plots. Rise time uses the first 10% and 90% setpoint crossings, interpolated between integration steps. Overshoot is excess beyond the setpoint, normalized by its magnitude; negative steps use the direction of the step. Settling uses the final entry into the 2% target band and requires at least 5% of the simulation (or 0.1 s) inside afterward. Finite simulations cannot guarantee future settling.</p>
+      <p>A steady-state error is estimated only when the last 15% of output varies by at most 0.0001 &times; max(1, |r|). Otherwise the end-of-window error is shown separately. A zero step has no normalized timing or overshoot metrics. Increase the duration to inspect slow or oscillating responses.</p>
+    </details>
+    <footer>Group 37 &middot; P1: Mohammad &middot; P2: Saif (planned) &middot; Browser-only simulation</footer>
+    <noscript><p class="fail">Enable JavaScript to run the live PID experiment.</p></noscript>
+  </main>
+</body>
+</html>

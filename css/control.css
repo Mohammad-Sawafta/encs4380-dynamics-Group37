@@ -1,0 +1,37 @@
+/* P1 extends the shared Homework 1 palette and cards. */
+#control .back-link { display: inline-block; color: var(--accent); margin-bottom: 20px; }
+#control .pid-presets { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 12px; }
+#control .pid-loop { margin: 24px 0; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+#control .pid-loop svg { display: block; width: 100%; max-width: 800px; margin: 4px auto 18px; }
+#control .pid-loop p { margin: auto; text-align: center; }
+#control .pid-workspace { grid-template-columns: 300px minmax(0, 1fr); }
+#control .controls { min-width: 0; }
+#control .number-field-grid { grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+#control .pid-equation { padding: 12px 0; border-bottom: 1px solid var(--line); font-family: monospace; }
+#control .pid-gain-control { margin-bottom: 14px; }
+#control .pid-gain-control .control-heading input { width: 90px; margin: 0; }
+#control .pid-plot { height: 320px; width: 100%; }
+#control .pid-effort-plot { height: 260px; }
+#control .pid-status { margin: 12px 0 0; min-height: 24px; }
+#control .pid-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#control .pid-metrics dd { font-size: 1rem; }
+#control #pid-metric-note { margin-bottom: 24px; }
+#control .pid-method { margin-top: 28px; padding: 20px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+#control summary { cursor: pointer; font-weight: 600; }
+#control .pid-method p { margin-top: 16px; font-size: 0.875rem; }
+#control #pid-validation-rows th { white-space: normal; min-width: 130px; }
+#control input:focus-visible, #control button:focus-visible, #control summary:focus-visible, #control a:focus-visible, #control select:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+#control [aria-invalid="true"] { border-color: var(--error); }
+@media (max-width: 850px) {
+  #control .pid-workspace { grid-template-columns: 1fr; }
+  #control .controls { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 480px) {
+  #control .pid-presets { display: grid; grid-template-columns: 1fr; }
+  #control .pid-loop, #control .pid-method { padding: 18px 14px; }
+  #control .pid-loop svg { min-height: 100px; }
+  #control .pid-metrics { gap: 12px; }
+  #control .pid-plot { height: 300px; }
+  #control .pid-effort-plot { height: 240px; }
+  #control .table-scroll table { min-width: 650px; }
+}
