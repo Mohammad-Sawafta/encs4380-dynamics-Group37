@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore sampled digital PID, anti-windup, and generated Arduino code.">
+  <title>Digital PID | Group 37</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/control.css">
+  <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
+  <script defer src="js/models/pid-control.js"></script>
+  <script defer src="js/models/digital-pid.js"></script>
+  <script defer src="js/plotting.js"></script>
+  <script defer src="js/control-p3.js"></script>
+</head>
+<body>
+  <main id="control">
+    <header>
+      <a class="back-link" href="index.html">&larr; Dynamic characteristics toolkit</a>
+      <div class="eyebrow">Homework 2 &middot; Control &middot; P3 / Saif</div>
+      <h1>Digital PID</h1>
+      <p class="muted">A microcontroller measures, calculates, and updates only at sample instants. Between them, the actuator holds its last command.</p>
+      <nav class="control-module-nav" aria-label="Control modules">
+        <a href="control.html">P1 &middot; Playground</a><a href="sensor-loop.html">P2 &middot; Slow sensor</a>
+        <a href="digital-pid.html" aria-current="page">P3 &middot; Digital PID</a>
+      </nav>
+      <div class="pid-presets" role="group" aria-label="Digital PID examples">
+        <button type="button" data-digital-preset="fast">01 &nbsp; Fast sampling</button>
+        <button type="button" data-digital-preset="coarse" class="secondary">02 &nbsp; Coarse sampling</button>
+        <button type="button" data-digital-preset="unstable" class="secondary">03 &nbsp; Sampling breaks it</button>
+        <button type="button" data-digital-preset="windup" class="secondary">04 &nbsp; Anti-windup</button>
+      </div>
+      <p id="digital-example-note" class="small muted">Fast sampling closely follows the intended continuous-controller behavior.</p>
+    </header>
+
+    <section class="prediction-panel" aria-labelledby="digital-prediction-heading">
+      <h2 id="digital-prediction-heading">Predict, then check</h2>
+      <fieldset class="prediction-choices">
+        <legend>Keep the plant and gains fixed. What happens when sampling time Ts becomes much larger?</legend>
+        <label class="choice"><input type="radio" name="digital-prediction" value="better"> Control becomes smoother and more stable</label>
+        <label class="choice"><input type="radio" name="digital-prediction" value="worse"> Updates become coarser and the loop can oscillate or diverge</label>
+        <label class="choice"><input type="radio" name="digital-prediction" value="same"> The response stays identical</label>
+      </fieldset>
+      <div class="prediction-actions">
+        <button id="digital-check" type="button" disabled>Check prediction and show large Ts</button>
+        <button id="digital-reset-prediction" type="button" class="secondary">Reset prediction</button>
+      </div>
+      <p id="digital-feedback" class="small" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="pid-loop" aria-labelledby="digital-loop-heading">
+      <h2 id="digital-loop-heading">Sample, calculate, hold</h2>
+      <div class="digital-flow" role="img" aria-label="At each sample the controller reads the output, calculates PID, limits the command, and holds it until the next sample.">
+        <span>Read y[k]</span><b>&rarr;</b><span>e[k] = r - y[k]</span><b>&rarr;</b><span>Digital PID</span><b>&rarr;</b><span>Clamp u[k]</span><b>&rarr;</b><span>Hold for Ts</span>
+      </div>
+      <p class="small muted">The page integrates the physical plant continuously, but u[k] changes only once every Ts seconds.</p>
+    </section>
+
+    <section class="workspace pid-workspace" aria-label="Digital PID experiment">
+      <form id="digital-form" class="controls" novalidate>
+        <h2>The experiment</h2>
+        <label class="field-label" for="digital-plant">Plant model</label>
+        <select id="digital-plant"><option value="first">First order (Module 1)</option><option value="second">Mass-spring-damper (Module 3)</option></select>
+        <div id="digital-first-fields" class="number-field-grid">
+          <label for="digital-gain">Gain K<input id="digital-gain" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+          <label for="digital-tau">Plant tau (s)<input id="digital-tau" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+        </div>
+        <div id="digital-second-fields" class="number-field-grid" hidden>
+          <label for="digital-mass">m (kg)<input id="digital-mass" type="number" value="1" min="0.1" max="5" step="0.1" required></label>
+          <label for="digital-damping">b (N s/m)<input id="digital-damping" type="number" value="2" min="0.1" max="10" step="0.1" required></label>
+          <label for="digital-stiffness">k (N/m)<input id="digital-stiffness" type="number" value="4" min="0.1" max="20" step="0.1" required></label>
+        </div>
+        <p id="digital-equation" class="small pid-equation">tau y' + y = K u[k]</p>
+        <div class="sensor-tau-control">
+          <div class="control-heading"><label for="digital-sampleTime">Sampling time Ts</label><input id="digital-sampleTime" type="number" min="0.01" max="1" step="0.01" value="0.02" required></div>
+          <input id="digital-sampleTime-slider" type="range" min="0.01" max="1" step="0.01" value="0.02" aria-label="Sampling time slider">
+          <div class="range-labels" aria-hidden="true"><span>0.01 s</span><span>1.00 s</span></div>
+        </div>
+        <div id="digital-gain-controls"></div>
+        <label class="toggle-line" for="digital-antiWindup"><input id="digital-antiWindup" type="checkbox" checked> Conditional anti-windup</label>
+        <p class="control-note">When enabled, the integral pauses if saturation and the current error would push the command farther beyond its limit.</p>
+        <div class="number-field-grid">
+          <label for="digital-setpoint">Setpoint step<input id="digital-setpoint" type="number" value="1" min="-5" max="5" step="0.1" required></label>
+          <label for="digital-duration">Duration (s)<input id="digital-duration" type="number" value="12" min="1" max="60" step="1" required></label>
+          <label for="digital-uMin">Lower u limit<input id="digital-uMin" type="number" value="-100" min="-100" max="100" step="0.1" required></label>
+          <label for="digital-uMax">Upper u limit<input id="digital-uMax" type="number" value="100" min="-100" max="100" step="0.1" required></label>
+        </div>
+        <p id="digital-input-error" role="alert" class="fail"></p>
+      </form>
+
+      <div class="chart-panel">
+        <div class="chart-heading"><h2>Sampled response</h2><button id="digital-reset-view" type="button" class="secondary">Reset plots</button></div>
+        <p id="digital-status" class="pid-status small" role="status" aria-live="polite">Running simulation...</p>
+        <div id="digital-chart-error" class="chart-status error" role="alert" hidden>Graphs could not load. Numerical results and code remain available. <button id="digital-retry" type="button" class="secondary">Retry graphs</button></div>
+        <figure><div id="digital-output-plot" class="pid-plot" role="img" aria-label="Sampled PID output and target over time"></div>
+          <figcaption>Green markers show controller samples. The plant continues moving between them.</figcaption></figure>
+        <dl class="metrics pid-metrics" aria-label="Digital PID response metrics">
+          <div><dt>Rise time</dt><dd id="digital-rise">&mdash;</dd></div><div><dt>Overshoot</dt><dd id="digital-overshoot">&mdash;</dd></div>
+          <div><dt>Settling time</dt><dd id="digital-settling">&mdash;</dd></div><div><dt>Steady-state error</dt><dd id="digital-error">&mdash;</dd></div>
+        </dl>
+        <p id="digital-metric-note" class="small muted"></p>
+        <h2>Stair-step control signal</h2>
+        <figure><div id="digital-control-plot" class="pid-plot pid-effort-plot" role="img" aria-label="Zero-order-held digital PID command"></div>
+          <figcaption>Each horizontal segment is one held command u[k]. Larger Ts makes the staircase coarser.</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="code-section" aria-labelledby="digital-code-heading">
+      <div class="chart-heading"><h2 id="digital-code-heading">Arduino loop for these settings</h2><button id="digital-copy-code" type="button">Copy code</button></div>
+      <p id="digital-copy-status" class="small muted" role="status" aria-live="polite">The generated loop uses derivative of error, the assignment equation, actuator limits, and the selected anti-windup mode.</p>
+      <pre id="digital-code" tabindex="0"></pre>
+    </section>
+
+    <details class="pid-method"><summary>Digital equation and implementation notes</summary>
+      <p>At sample k, the controller uses u[k] = Kp e[k] + Ki Ts sum(e[j]) + Kd (e[k] - e[k-1]) / Ts. The command is clipped and then held constant while RK4 advances the plant to the next sample. Unlike P1 and P2, this module deliberately differentiates error to match the homework equation.</p>
+      <p>With anti-windup enabled, a saturated update is rejected only when the error would drive the integral farther into saturation. Integration resumes automatically when the error reverses or the command returns inside the limits.</p>
+    </details>
+    <footer>Group 37 &middot; P3: Saif &middot; Sampled PID and generated Arduino code</footer>
+    <noscript><p class="fail">Enable JavaScript to run the digital PID experiment.</p></noscript>
+  </main>
+</body>
+</html>

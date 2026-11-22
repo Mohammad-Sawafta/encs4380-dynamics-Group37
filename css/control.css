@@ -3,8 +3,15 @@
 #control .pid-presets { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 12px; }
 #control .control-module-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
 #control .control-module-nav a { border: 1px solid var(--line); border-radius: 999px; color: var(--accent); padding: 8px 13px; text-decoration: none; }
-#control .control-module-nav a[aria-current="page"] { background: var(--accent-soft); border-color: var(--accent); font-weight: 700; }
+#control .control-module-nav a[aria-current="page"] { background: var(--tint); border-color: var(--accent); font-weight: 700; }
 #control .sensor-tau-control { border-bottom: 1px solid var(--line); margin-bottom: 16px; padding-bottom: 16px; }
+#control .digital-flow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 14px auto 18px; }
+#control .digital-flow span { padding: 10px 13px; border: 1px solid var(--accent); border-radius: 8px; background: var(--tint); font-weight: 600; }
+#control .digital-flow b { color: var(--accent); }
+#control .toggle-line { display: flex; align-items: center; gap: 10px; margin: 18px 0 8px; font-weight: 600; }
+#control .toggle-line input { width: 20px; height: 20px; accent-color: var(--accent); }
+#control .code-section { margin-top: 28px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+#control .code-section pre { max-height: 540px; overflow: auto; margin: 18px 0 0; padding: 18px; border-radius: 8px; background: #17251f; color: #e9f5ef; font-size: 0.84rem; line-height: 1.5; tab-size: 2; }
 #control .pid-loop { margin: 24px 0; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
 #control .pid-loop svg { display: block; width: 100%; max-width: 800px; margin: 4px auto 18px; }
 #control .pid-loop p { margin: auto; text-align: center; }
@@ -38,4 +45,7 @@
   #control .pid-plot { height: 300px; }
   #control .pid-effort-plot { height: 240px; }
   #control .table-scroll table { min-width: 650px; }
+  #control .code-section { padding: 18px 14px; }
+  #control .digital-flow b { display: none; }
+  #control .digital-flow span { width: 100%; text-align: center; }
 }

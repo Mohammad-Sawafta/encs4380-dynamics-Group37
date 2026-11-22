@@ -24,11 +24,16 @@ sensor report. Four presets move from ideal feedback through growing lag to an
 unstable oscillation without changing the PID gains. The ideal `tau_s = 0` case
 bypasses the sensor algebraically and reproduces P1 exactly.
 
+P3 implements the assignment's sampled PID equation with a zero-order-held
+stair-step command, adjustable sampling time, conditional anti-windup, and
+Arduino code generated from the current settings. Its presets show the same
+gains moving from fast sampling to unstable sampled behavior.
+
 | Homework 2 module | Owner | Status |
 | --- | --- | --- |
 | P1 - PID playground | Mohammad | Implemented |
 | P2 - Slow sensor in the loop | Saif | Implemented |
-| P3 - Digital PID | To assign | Pending |
+| P3 - Digital PID | Saif | Implemented |
 | P4 - Tuning challenge | To assign | Pending |
 | My system - measured motor speed loop | To assign | Pending measurements and design |
 
@@ -60,6 +65,11 @@ independent RK4 reference, proves the zero-lag bypass is identical to P1, checks
 that sensor lag increases overshoot and produces growing oscillation, and covers
 second-order plants, saturation, invalid input, and solver-step convergence.
 
+`tests/digital-pid.test.cjs` checks the discrete assignment equation, uniform
+sample instants, zero-order hold behavior, convergence toward continuous PI at
+small Ts, instability at large Ts, conditional anti-windup, saturation, and the
+generated Arduino loop.
+
 The P1 review on 21 November checked the assignment requirements and fixed
 metrics that previously depended on plot sampling. Browser interaction and
 phone-layout verification remain pending: the review environment could not
@@ -68,6 +78,10 @@ reach the local preview server.
 The P2 review on 21 November exercised every preset and the prediction flow in
 a real browser, confirmed both Plotly graphs render without console errors, and
 checked desktop and narrow phone layouts for horizontal overflow.
+
+The P3 review on 22 November exercised sampled-instability and anti-windup
+presets, generated-code copying, and responsive desktop and 360-pixel layouts
+without console errors or page overflow.
 
 The [P1/P2 handoff](docs/plans/2026-11-21-pid-p1-p2-handoff.md) documents the
 shared functions, sensor-state extension and remaining submission tasks.
@@ -203,7 +217,7 @@ node --test tests/*.test.cjs
 
 The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3. The Module 3 suite compares displacement and velocity against independent RK4 integration across all three regimes and checks the timing metrics, poles, and homework validations 4–6.
 
-The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 28 Node test cases reported across the toolkit pass.
+The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 36 Node test cases reported across the toolkit pass.
 
 Local Chrome verification passed 52 browser checks covering all three challenge types, hidden answers, invalid inputs, 0/50/100 scoring, repeated submission, new rounds, graph loading and rendering recovery, keyboard navigation, 360-pixel layout, and the existing modules' prediction interactions and six homework validations. Desktop and phone screenshots were visually reviewed.
 
@@ -219,6 +233,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/models/sensor-challenge.js` | Pure sensor generation, fixed noise, response adaptation, input validation, scoring, and session state |
 | `js/models/pid-control.js` | Continuous PID, plant integration, saturation, and response metrics for P1 |
 | `js/models/pid-sensor.js` | First-order sensor state inside the PID feedback loop for P2 |
+| `js/models/digital-pid.js` | Sampled PID, zero-order hold, conditional anti-windup, and Arduino generation for P3 |
 | `js/plotting.js` | Shared Plotly styling, rendering, and reset helpers |
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
 | `js/module2.js` | Module 2 controls, graphs, calculators, prediction, and validation |
@@ -226,12 +241,14 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/module4.js` | Module 4 estimates, hints, reveal graphs, recovery, and session feedback |
 | `js/control-p1.js` | P1 controls, presets, plots, metrics, and validation display |
 | `js/control-p2.js` | P2 sensor-lag controls, presets, plots, prediction, and diagnostics |
+| `js/control-p3.js` | P3 sampling, anti-windup, stair-step plots, prediction, and code-copy interaction |
 | `tests/first-order.test.cjs` | Independent Module 1 numerical verification |
 | `tests/frequency-response.test.cjs` | Module 2 equation and validation tests |
 | `tests/second-order.test.cjs` | Module 3 response, timing, and validation tests |
 | `tests/sensor-challenge.test.cjs` | Module 4 generation, numerical, scoring, and session tests |
 | `tests/pid-control.test.cjs` | P1 analytical comparisons, metrics, saturation, and convergence tests |
 | `tests/pid-sensor.test.cjs` | P2 sensor dynamics, lag, oscillation, and bypass tests |
+| `tests/digital-pid.test.cjs` | P3 discrete equation, sampling, anti-windup, and generated-code tests |
 
 ## Group members and module ownership
 
@@ -247,6 +264,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | Module 4 - Guess the Sensor challenge | Mohammad | Implemented with random sensors, hints, scoring, reveal overlays, and tests |
 | Homework 2 P1 - PID playground | Mohammad | Implemented with continuous PID, actuator limits, metrics, and tests |
 | Homework 2 P2 - slow sensor in the loop | Saif | Implemented with delayed feedback, oscillation presets, and tests |
+| Homework 2 P3 - digital PID | Saif | Implemented with sampling, anti-windup, Arduino code, and tests |
 
 ## Screenshots
 
@@ -270,3 +288,7 @@ For Module 4, AI assistance supported the approved requirements, challenge imple
 
 For Homework 2 P2, AI assistance supported the coupled plant-sensor-PID RK4
 model, the slow-sensor teaching interaction, and numerical regression tests.
+
+For Homework 2 P3, AI assistance supported the sampled-controller model,
+anti-windup logic, Arduino code generation, responsive interactions, and
+numerical/browser verification.
