@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tune PID gains for a hidden random plant and pass three response specifications.">
+  <title>PID tuning challenge | Group 37</title>
+  <link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/control.css">
+  <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
+  <script defer src="js/models/pid-control.js"></script><script defer src="js/models/pid-tuning-challenge.js"></script>
+  <script defer src="js/plotting.js"></script><script defer src="js/control-p4.js"></script>
+</head>
+<body>
+  <main id="control">
+    <header>
+      <a class="back-link" href="index.html">&larr; Dynamic characteristics toolkit</a>
+      <div class="eyebrow">Homework 2 &middot; Control &middot; P4 / Saif</div>
+      <h1>PID tuning challenge</h1>
+      <p class="muted">Tune three gains without seeing the plant parameters. The response is your evidence.</p>
+      <nav class="control-module-nav" aria-label="Control modules">
+        <a href="control.html">P1 &middot; Playground</a><a href="sensor-loop.html">P2 &middot; Slow sensor</a>
+        <a href="digital-pid.html">P3 &middot; Digital PID</a><a href="tuning-challenge.html" aria-current="page">P4 &middot; Tuning</a>
+      </nav>
+    </header>
+
+    <section class="prediction-panel" aria-labelledby="tuning-prediction-heading">
+      <h2 id="tuning-prediction-heading">Predict, then check</h2>
+      <fieldset class="prediction-choices"><legend>Which term is necessary to remove steady-state error for a constant step?</legend>
+        <label class="choice"><input type="radio" name="tuning-prediction" value="p"> Proportional Kp</label>
+        <label class="choice"><input type="radio" name="tuning-prediction" value="i"> Integral Ki</label>
+        <label class="choice"><input type="radio" name="tuning-prediction" value="d"> Derivative Kd</label>
+      </fieldset>
+      <div class="prediction-actions"><button id="tuning-check-prediction" type="button" disabled>Check prediction</button><button id="tuning-reset-prediction" type="button" class="secondary">Reset prediction</button></div>
+      <p id="tuning-prediction-feedback" class="small" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="challenge-banner" aria-labelledby="tuning-spec-heading">
+      <div><div class="eyebrow">Hidden first-order plant</div><h2 id="tuning-spec-heading">Pass all three specifications</h2>
+        <ul class="spec-list"><li>Overshoot &le; 10%</li><li>Settling time &le; 6 s</li><li>|steady-state error| &le; 0.02</li></ul></div>
+      <dl class="challenge-score"><div><dt>Current score</dt><dd id="tuning-score">0 / 3</dd></div><div><dt>Best score</dt><dd id="tuning-best">0 / 3</dd></div><div><dt>Attempts</dt><dd id="tuning-attempts">0</dd></div></dl>
+    </section>
+
+    <section class="workspace pid-workspace" aria-label="PID tuning challenge">
+      <form id="tuning-form" class="controls" novalidate>
+        <h2>Your controller</h2><p class="control-note">One hidden plant stays fixed while you retry. Change one gain at a time and learn from the response.</p>
+        <div id="tuning-gain-controls"></div>
+        <div class="challenge-actions"><button id="tuning-run" type="submit">Test these gains</button><button id="tuning-new" type="button" class="secondary">New hidden plant</button></div>
+        <button id="tuning-reveal" type="button" class="secondary reveal-button" disabled>Reveal plant after an attempt</button>
+        <p id="tuning-plant" class="plant-reveal small muted">Plant parameters are hidden.</p>
+        <p id="tuning-input-error" role="alert" class="fail"></p>
+      </form>
+
+      <div class="chart-panel">
+        <div class="chart-heading"><h2>Response evidence</h2><button id="tuning-reset-view" type="button" class="secondary">Reset plot</button></div>
+        <p id="tuning-status" class="pid-status small" role="status" aria-live="polite">Choose gains and test your first design.</p>
+        <div id="tuning-chart-error" class="chart-status error" role="alert" hidden>Graph could not load. Scores remain available. <button id="tuning-retry" type="button" class="secondary">Retry graph</button></div>
+        <figure><div id="tuning-output-plot" class="pid-plot tuning-plot" role="img" aria-label="Hidden plant response and target"></div><figcaption>The green curve is the hidden plant's output. Use its shape and the score table to choose your next gains.</figcaption></figure>
+        <div class="table-scroll"><table class="challenge-results"><caption>Specification score for the latest attempt</caption><thead><tr><th scope="col">Requirement</th><th scope="col">Limit</th><th scope="col">Measured</th><th scope="col">Result</th></tr></thead><tbody id="tuning-results"><tr><td colspan="4">No attempt yet.</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <details class="pid-method"><summary>Challenge rules and tuning hints</summary>
+      <p>Each new round draws K between 0.7 and 1.5 and tau between 0.6 s and 2.0 s for tau y' + y = K u. The same hidden plant remains active across retries. A new plant resets the attempt and best-score counters.</p>
+      <p>Kp usually shortens rise time but cannot remove all step error. Ki removes step error but too much can add overshoot. Kd reacts to motion and can add damping. A metric not reached within the 18-second simulation fails its requirement.</p>
+    </details>
+    <footer>Group 37 &middot; P4: Saif &middot; Hidden random first-order PID challenge</footer>
+    <noscript><p class="fail">Enable JavaScript to run the tuning challenge.</p></noscript>
+  </main>
+</body>
+</html>

@@ -29,12 +29,17 @@ stair-step command, adjustable sampling time, conditional anti-windup, and
 Arduino code generated from the current settings. Its presets show the same
 gains moving from fast sampling to unstable sampled behavior.
 
+P4 draws a hidden random first-order plant and scores PID gains independently
+against overshoot, settling-time, and steady-state-error limits. A plant stays
+fixed across retries, can be revealed after an attempt, and is replaced only
+when the user starts a new challenge.
+
 | Homework 2 module | Owner | Status |
 | --- | --- | --- |
 | P1 - PID playground | Mohammad | Implemented |
 | P2 - Slow sensor in the loop | Saif | Implemented |
 | P3 - Digital PID | Saif | Implemented |
-| P4 - Tuning challenge | To assign | Pending |
+| P4 - Tuning challenge | Saif | Implemented |
 | My system - measured motor speed loop | To assign | Pending measurements and design |
 
 The simulation uses RK4 on the full plant/controller state. Both plant equations
@@ -68,7 +73,9 @@ second-order plants, saturation, invalid input, and solver-step convergence.
 `tests/digital-pid.test.cjs` checks the discrete assignment equation, uniform
 sample instants, zero-order hold behavior, convergence toward continuous PI at
 small Ts, instability at large Ts, conditional anti-windup, saturation, and the
-generated Arduino loop.
+generated Arduino loop. `tests/pid-tuning-challenge.test.cjs` covers random-plant
+bounds, input validation, independent scoring, and feasible designs across the
+entire hidden-plant range.
 
 The P1 review on 21 November checked the assignment requirements and fixed
 metrics that previously depended on plot sampling. Browser interaction and
@@ -79,9 +86,10 @@ The P2 review on 21 November exercised every preset and the prediction flow in
 a real browser, confirmed both Plotly graphs render without console errors, and
 checked desktop and narrow phone layouts for horizontal overflow.
 
-The P3 review on 22 November exercised sampled-instability and anti-windup
-presets, generated-code copying, and responsive desktop and 360-pixel layouts
-without console errors or page overflow.
+The P3/P4 review on 22 November exercised sampled-instability and anti-windup
+presets, generated-code copying, challenge retries, reveal and full-score paths,
+and responsive desktop and 360-pixel layouts without console errors or page
+overflow.
 
 The [P1/P2 handoff](docs/plans/2026-11-21-pid-p1-p2-handoff.md) documents the
 shared functions, sensor-state extension and remaining submission tasks.
@@ -217,7 +225,7 @@ node --test tests/*.test.cjs
 
 The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3. The Module 3 suite compares displacement and velocity against independent RK4 integration across all three regimes and checks the timing metrics, poles, and homework validations 4–6.
 
-The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 36 Node test cases reported across the toolkit pass.
+The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 41 Node test cases reported across the toolkit pass.
 
 Local Chrome verification passed 52 browser checks covering all three challenge types, hidden answers, invalid inputs, 0/50/100 scoring, repeated submission, new rounds, graph loading and rendering recovery, keyboard navigation, 360-pixel layout, and the existing modules' prediction interactions and six homework validations. Desktop and phone screenshots were visually reviewed.
 
@@ -234,6 +242,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/models/pid-control.js` | Continuous PID, plant integration, saturation, and response metrics for P1 |
 | `js/models/pid-sensor.js` | First-order sensor state inside the PID feedback loop for P2 |
 | `js/models/digital-pid.js` | Sampled PID, zero-order hold, conditional anti-windup, and Arduino generation for P3 |
+| `js/models/pid-tuning-challenge.js` | Hidden random plant generation and three-part specification scoring for P4 |
 | `js/plotting.js` | Shared Plotly styling, rendering, and reset helpers |
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
 | `js/module2.js` | Module 2 controls, graphs, calculators, prediction, and validation |
@@ -242,6 +251,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/control-p1.js` | P1 controls, presets, plots, metrics, and validation display |
 | `js/control-p2.js` | P2 sensor-lag controls, presets, plots, prediction, and diagnostics |
 | `js/control-p3.js` | P3 sampling, anti-windup, stair-step plots, prediction, and code-copy interaction |
+| `js/control-p4.js` | P4 hidden-plant attempts, score table, reveal, plots, and prediction interaction |
 | `tests/first-order.test.cjs` | Independent Module 1 numerical verification |
 | `tests/frequency-response.test.cjs` | Module 2 equation and validation tests |
 | `tests/second-order.test.cjs` | Module 3 response, timing, and validation tests |
@@ -249,6 +259,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `tests/pid-control.test.cjs` | P1 analytical comparisons, metrics, saturation, and convergence tests |
 | `tests/pid-sensor.test.cjs` | P2 sensor dynamics, lag, oscillation, and bypass tests |
 | `tests/digital-pid.test.cjs` | P3 discrete equation, sampling, anti-windup, and generated-code tests |
+| `tests/pid-tuning-challenge.test.cjs` | P4 random range, feasibility, validation, and scoring tests |
 
 ## Group members and module ownership
 
@@ -265,6 +276,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | Homework 2 P1 - PID playground | Mohammad | Implemented with continuous PID, actuator limits, metrics, and tests |
 | Homework 2 P2 - slow sensor in the loop | Saif | Implemented with delayed feedback, oscillation presets, and tests |
 | Homework 2 P3 - digital PID | Saif | Implemented with sampling, anti-windup, Arduino code, and tests |
+| Homework 2 P4 - tuning challenge | Saif | Implemented with hidden plants, specification scoring, and tests |
 
 ## Screenshots
 
@@ -289,6 +301,6 @@ For Module 4, AI assistance supported the approved requirements, challenge imple
 For Homework 2 P2, AI assistance supported the coupled plant-sensor-PID RK4
 model, the slow-sensor teaching interaction, and numerical regression tests.
 
-For Homework 2 P3, AI assistance supported the sampled-controller model,
-anti-windup logic, Arduino code generation, responsive interactions, and
-numerical/browser verification.
+For Homework 2 P3 and P4, AI assistance supported the sampled-controller model,
+anti-windup logic, Arduino code generation, hidden-plant scoring, responsive
+interactions, and numerical/browser verification.

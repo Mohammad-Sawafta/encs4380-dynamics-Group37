@@ -5,7 +5,7 @@ P2 completion update, 21 November: `sensor-loop.html`, `js/control-p2.js`,
 The zero-lag bypass matches P1 exactly; lag and growing-oscillation presets,
 desktop/phone browser checks, and the full numerical suite pass.
 
-Owner of P1: Mohammad. Owners of P2 and P3: Saif. P4 and My system still need owners.
+Owner of P1: Mohammad. Owners of P2, P3, and P4: Saif. My system still needs an owner and measured motor data.
 Source: ENCS4380 Homework 2 PID Control Toolkit, released 16 November 2026.
 Final release v2.0 and Pages link due 23 November 2026. P1/P2 checkpoint was 19 November.
 
@@ -81,7 +81,7 @@ convention. Commit your own work so individual contribution remains visible.
   motor measurements. Generic P1 parameters are teaching examples.
 - Create/track one GitHub issue per module assigned to its actual owner.
 - Publish reviewed changes through the existing GitHub Pages repository.
-- Complete P4 and My system before making the final v2.0 release. P2 and P3 are implemented.
+- Complete My system before making the final v2.0 release. P2-P4 are implemented locally and await review/publication.
 
 ## Demo preparation for Mohammad
 
