@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Identify a Micromouse drive motor and design a sampled PID speed controller.">
+  <title>My System: Micromouse motor | Group 37</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/control.css">
+  <script defer src="https://cdn.plot.ly/plotly-4.1.1.min.js" charset="utf-8"></script>
+  <script defer src="js/models/pid-control.js"></script>
+  <script defer src="js/models/digital-pid.js"></script>
+  <script defer src="js/models/micromouse-system.js"></script>
+  <script defer src="js/plotting.js"></script>
+  <script defer src="js/my-system.js"></script>
+</head>
+<body>
+  <main id="control">
+    <header>
+      <a class="back-link" href="index.html">&larr; Dynamic characteristics toolkit</a>
+      <div class="eyebrow">Homework 2 &middot; My System / Yanal Omar</div>
+      <h1>Micromouse motor speed control</h1>
+      <p class="muted">Identify a first-order drive-motor model from an encoder step test, then test a sampled PID controller before using it on hardware.</p>
+      <nav class="control-module-nav" aria-label="Control modules">
+        <a href="control.html">P1 &middot; Playground</a><a href="sensor-loop.html">P2 &middot; Slow sensor</a>
+        <a href="digital-pid.html">P3 &middot; Digital PID</a><a href="tuning-challenge.html">P4 &middot; Tuning</a>
+        <a href="my-system.html" aria-current="page">My System &middot; Micromouse</a>
+      </nav>
+    </header>
+
+    <section class="system-intro" aria-labelledby="system-purpose-heading">
+      <h2 id="system-purpose-heading">Why control wheel speed?</h2>
+      <p>Each drive motor turns one Micromouse wheel. Reliable speed regulation helps the robot travel straight, execute repeatable turns, and correct motion consistently as battery voltage and load change. This page uses <strong>RPM</strong> for encoder-derived shaft speed and <strong>percent</strong> for a unidirectional PWM command from 0% to 100%.</p>
+      <p class="small muted">An encoder provides pulse counts over a known time interval. Convert counts to revolutions using the measured encoder resolution and gearing, then convert revolutions per interval to RPM. No encoder resolution, gear ratio, pin, or motor-driver API is assumed here.</p>
+    </section>
+
+    <section class="prediction-panel" aria-labelledby="system-prediction-heading">
+      <h2 id="system-prediction-heading">Predict, then check</h2>
+      <label class="field-label" for="system-prediction-topic">Choose one change</label>
+      <select id="system-prediction-topic">
+        <option value="kp">Increase Kp</option><option value="ki">Increase Ki</option>
+        <option value="kd">Increase Kd</option><option value="ts">Increase sampling period Ts</option>
+        <option value="saturation">Request more speed than the 100% PWM limit can supply</option>
+      </select>
+      <fieldset class="prediction-choices">
+        <legend>What is the most likely effect?</legend>
+        <label class="choice"><input type="radio" name="system-prediction" value="faster"> Faster or more aggressive response</label>
+        <label class="choice"><input type="radio" name="system-prediction" value="damped"> More damping / less rapid motion</label>
+        <label class="choice"><input type="radio" name="system-prediction" value="limited"> Coarser or limited response that may miss the target</label>
+      </fieldset>
+      <div class="prediction-actions"><button id="system-check-prediction" type="button" disabled>Check prediction</button><button id="system-reset-prediction" class="secondary" type="button">Reset</button></div>
+      <p id="system-prediction-feedback" class="small" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="system-section" aria-labelledby="identification-heading">
+      <div class="eyebrow">1 &middot; Plant identification</div>
+      <h2 id="identification-heading">PWM step test</h2>
+      <p>Apply a safe constant PWM baseline, wait for steady speed, then step to a second PWM value while recording timestamped encoder speed. For <span class="formula-inline">G(s) = K / (&tau;s + 1)</span>, the steady speed change gives <span class="formula-inline">K = &Delta;speed / &Delta;PWM</span>; &tau; is the time after the step when speed reaches 63.2% of its total change.</p>
+      <div class="system-grid">
+        <form id="identification-form" class="system-card" novalidate>
+          <h3>Test conditions</h3>
+          <div class="number-field-grid">
+            <label for="id-baseline-pwm">Baseline PWM (%)<input id="id-baseline-pwm" type="number" value="0" min="0" max="100" step="0.1" required></label>
+            <label for="id-step-pwm">Stepped PWM (%)<input id="id-step-pwm" type="number" value="40" min="0" max="100" step="0.1" required></label>
+            <label for="id-baseline-speed">Baseline speed (RPM)<input id="id-baseline-speed" type="number" value="0" step="0.1" required></label>
+            <label for="id-step-time">Step time (s)<input id="id-step-time" type="number" value="0" min="0" step="0.01" required></label>
+          </div>
+          <label class="field-label" for="id-samples">Time (s), speed (RPM) &mdash; one pair per line</label>
+          <textarea id="id-samples" rows="10" spellcheck="false" placeholder="0.00, 0&#10;0.05, 18&#10;0.10, 31"></textarea>
+          <div class="prediction-actions"><button type="submit">Identify K and tau</button><button id="id-load-demo" class="secondary" type="button">Load demonstration data</button></div>
+          <p class="control-note"><strong>Demonstration data is synthetic</strong> and only tests the workflow. Replace it with your own encoder measurements before reporting hardware results.</p>
+          <p id="id-error" class="fail" role="alert"></p>
+        </form>
+        <div class="system-card chart-panel">
+          <div class="chart-heading"><h3>Measured versus fitted response</h3><button id="id-reset-view" class="secondary" type="button">Reset plot</button></div>
+          <p id="id-data-label" class="small muted">No measurements analyzed yet.</p>
+          <div id="id-chart-error" class="chart-status error" role="alert" hidden>Plotly could not draw the graph; calculated values remain available.</div>
+          <figure><div id="id-plot" class="pid-plot" role="img" aria-label="Measured motor speed and fitted first-order response"></div><figcaption>The fit uses the entered baselines and actual PWM step. Tail samples estimate steady-state speed; the first interpolated 63.2% crossing estimates tau.</figcaption></figure>
+          <dl class="metrics pid-metrics">
+            <div><dt>Steady speed</dt><dd id="id-steady">&mdash;</dd></div><div><dt>Gain K</dt><dd id="id-gain">&mdash;</dd></div>
+            <div><dt>Time constant tau</dt><dd id="id-tau">&mdash;</dd></div><div><dt>Fit RMSE</dt><dd id="id-rmse">&mdash;</dd></div>
+          </dl>
+          <button id="id-use-fit" type="button" disabled>Use identified K and tau below</button>
+        </div>
+      </div>
+      <details class="pid-method"><summary>Measurement procedure and assumptions</summary>
+        <ol><li>Raise the robot so the wheel can rotate safely, or use an appropriate test fixture.</li><li>Record baseline PWM and steady baseline speed. At the recorded step time, change PWM once and hold it.</li><li>At each interval, convert encoder counts to RPM using the real counts-per-revolution and gear ratio.</li><li>Continue long enough to reach a visibly steady tail. Enter raw time/speed pairs without relabeling simulated values as measurements.</li></ol>
+        <p>The fit assumes a stable positive-gain first-order motor over this operating range. Dead zones, battery sag, friction, load changes, noise, and nonlinear driver behavior can reduce fit quality.</p>
+      </details>
+    </section>
+
+    <section class="system-section" aria-labelledby="controller-heading">
+      <div class="eyebrow">2 &middot; Controller design</div><h2 id="controller-heading">Sampled PID speed loop</h2>
+      <p>Enter identified K and tau manually or transfer them from the fit. The existing P3 zero-order-hold solver is reused with conditional anti-windup and a fixed physical PWM range of 0&ndash;100%.</p>
+      <div class="workspace pid-workspace">
+        <form id="motor-form" class="controls" novalidate>
+          <h3>Motor and controller</h3>
+          <div class="number-field-grid">
+            <label for="motor-gain">K (RPM/% PWM)<input id="motor-gain" type="number" value="3" min="0.001" step="any" required></label>
+            <label for="motor-tau">tau (s)<input id="motor-tau" type="number" value="0.35" min="0.001" step="any" required></label>
+            <label for="motor-target">Target speed (RPM)<input id="motor-target" type="number" value="180" min="0.1" step="any" required></label>
+            <label for="motor-duration">Duration (s)<input id="motor-duration" type="number" value="4" min="0.2" max="60" step="0.1" required></label>
+            <label for="motor-kp">Kp<input id="motor-kp" type="number" value="0.7" min="0" step="0.01" required></label>
+            <label for="motor-ki">Ki (1/s)<input id="motor-ki" type="number" value="2" min="0" step="0.01" required></label>
+            <label for="motor-kd">Kd (s)<input id="motor-kd" type="number" value="0" min="0" step="0.001" required></label>
+            <label for="motor-sample-time">Ts (s)<input id="motor-sample-time" type="number" value="0.02" min="0.001" step="0.001" required></label>
+          </div>
+          <p class="control-note">PWM limit: 0&ndash;100%. Anti-windup: always enabled. Use positive targets with this unidirectional model.</p>
+          <button type="submit">Run controller simulation</button><p id="motor-error" class="fail" role="alert"></p>
+        </form>
+        <div class="chart-panel">
+          <div class="chart-heading"><h3>Target and motor speed</h3><button id="motor-reset-view" class="secondary" type="button">Reset plots</button></div>
+          <p id="motor-status" class="pid-status small" role="status" aria-live="polite">Running simulation...</p>
+          <div id="motor-chart-error" class="chart-status error" role="alert" hidden>Graphs could not load. Metrics and generated code remain available.</div>
+          <figure><div id="motor-speed-plot" class="pid-plot" role="img" aria-label="Target and simulated motor speed in RPM"></div></figure>
+          <dl class="metrics pid-metrics"><div><dt>Rise time</dt><dd id="motor-rise">&mdash;</dd></div><div><dt>Overshoot</dt><dd id="motor-overshoot">&mdash;</dd></div><div><dt>Settling time</dt><dd id="motor-settling">&mdash;</dd></div><div><dt>Steady-state error</dt><dd id="motor-sse">&mdash;</dd></div></dl>
+          <h3>Applied PWM command</h3><figure><div id="motor-pwm-plot" class="pid-plot pid-effort-plot" role="img" aria-label="Applied PWM command from zero to one hundred percent"></div><figcaption>The stair-step command is clipped to the physically valid 0&ndash;100% range.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="system-section" aria-labelledby="specification-heading">
+      <div class="eyebrow">3 &middot; Design check</div><h2 id="specification-heading">Micromouse speed specifications</h2>
+      <p>The limits scale with the identified motor: rise time &le; max(0.15 s, 1.5&tau;), settling time &le; max(0.5 s, 4&tau;), overshoot &le; 10%, and steady-state error &le; max(1 RPM, 2% of target). Fast, low-overshoot speed response supports straight travel and repeatable cell-to-cell motion without demanding impossible PWM.</p>
+      <div class="table-scroll"><table class="challenge-results"><caption>Current design results</caption><thead><tr><th>Requirement</th><th>Limit</th><th>Measured</th><th>Result</th></tr></thead><tbody id="motor-spec-results"></tbody></table></div>
+      <p id="motor-damping-note" class="small muted"></p>
+      <details class="pid-method"><summary>Damping-ratio derivation and limits</summary><p>For the ideal continuous controller C(s) = Kp + Ki/s + Kd s and motor G(s) = K/(&tau;s + 1), the unity-feedback characteristic polynomial is (&tau; + K Kd)s&sup2; + (1 + K Kp)s + K Ki. When Ki &gt; 0, matching a s&sup2; + b s + c to s&sup2; + 2&zeta;&omega;<sub>n</sub>s + &omega;<sub>n</sub>&sup2; gives &omega;<sub>n</sub> = sqrt(K Ki / (&tau; + K Kd)) and &zeta; = (1 + K Kp) / (2 sqrt((&tau; + K Kd) K Ki)). The displayed &zeta; is therefore a continuous linear approximation only; digital sampling, saturation, anti-windup, derivative discretization, and real motor nonlinearities are not included. The actual simulated metrics determine pass/fail for time-domain requirements.</p></details>
+    </section>
+
+    <section class="code-section" aria-labelledby="motor-code-heading">
+      <div class="chart-heading"><h2 id="motor-code-heading">Arduino controller for current settings</h2><button id="motor-copy-code" type="button">Copy code</button></div>
+      <p id="motor-copy-status" class="small muted" role="status" aria-live="polite">Configure encoder-to-RPM conversion, board pins, motor-driver direction/API, timer behavior, and safe electrical limits before uploading.</p>
+      <pre id="motor-code" tabindex="0"></pre>
+    </section>
+    <footer>Group 37 &middot; Owner: Yanal Omar (yaniomar) &middot; Browser-only model; no hardware test claimed</footer>
+    <noscript><p class="fail">Enable JavaScript to use the identification and control workflow.</p></noscript>
+  </main>
+</body>
+</html>

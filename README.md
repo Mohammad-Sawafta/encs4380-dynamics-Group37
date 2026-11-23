@@ -12,7 +12,7 @@ To run the toolkit locally, serve this checkout with `python -m http.server 8765
 
 ## Homework 2: Control
 
-Open `control.html` and `sensor-loop.html` using the two **Control** links on the landing page.
+Open the five Homework 2 pages from the **Control** and **My System** links on the landing page.
 P1 provides first-order and mass-spring-damper plants, live Kp/Ki/Kd controls,
 setpoint and actuator limits, a feedback diagram, output and control-effort
 graphs, response metrics, prediction feedback, and three homework validations.
@@ -34,13 +34,23 @@ against overshoot, settling-time, and steady-state-error limits. A plant stays
 fixed across retries, can be revealed after an attempt, and is replaced only
 when the user starts a new challenge.
 
+My System applies the shared sampled PID model to a Micromouse drive motor. It
+accepts timestamped encoder-speed measurements from a real PWM step test,
+handles nonzero input and speed baselines, estimates `K` from the actual PWM
+change, interpolates the 63.2% crossing for `tau`, and compares entered samples
+with a first-order fit. It then simulates 0-100% PWM control, scores motor-scaled
+time-domain specifications, reports a mathematically derived continuous-model
+damping approximation, and generates hardware-neutral Arduino integration
+code. Its built-in demonstration dataset is explicitly synthetic and is not a
+hardware measurement.
+
 | Homework 2 module | Owner | Status |
 | --- | --- | --- |
 | P1 - PID playground | Mohammad | Implemented |
 | P2 - Slow sensor in the loop | Saif | Implemented |
 | P3 - Digital PID | Saif | Implemented |
 | P4 - Tuning challenge | Saif | Implemented |
-| My system - measured motor speed loop | To assign | Pending measurements and design |
+| My system - Micromouse motor speed loop | Yanal Omar (`yaniomar`) | Implemented; real measurements and physical validation still required |
 
 The simulation uses RK4 on the full plant/controller state. Both plant equations
 are preserved from Homework 1. The requested command is clipped before it
@@ -90,6 +100,47 @@ The P3/P4 review on 22 November exercised sampled-instability and anti-windup
 presets, generated-code copying, challenge retries, reveal and full-score paths,
 and responsive desktop and 360-pixel layouts without console errors or page
 overflow.
+
+### My System: Micromouse drive motor
+
+Owner: **Yanal Omar (`yaniomar`)**.
+
+The motor is modeled over one operating region as
+`G(s) = K/(tau*s + 1)`, with speed in RPM and PWM command in percent. Real
+parameters must come from a step experiment: record baseline PWM and steady
+speed, apply and hold a different PWM command, and calculate
+`K = (steady speed - baseline speed)/(step PWM - baseline PWM)`. The time
+constant is measured from the interpolated time at which speed reaches 63.2% of
+its total change. Encoder counts must be converted with the robot's actual
+encoder resolution and gearing; those hardware values are deliberately not
+invented in this repository.
+
+The controller reuses `DigitalPIDModel`, so the browser simulation and generated
+Arduino loop use the same sampled PID equation, zero-order hold, 0-100% command
+clipping, and conditional anti-windup. The generated code exposes
+`readEncoderSpeedRPM()` and `writeMotorPWMPercent()` as integration points;
+board pins, interrupt setup, encoder resolution, gearing, direction handling,
+motor-driver APIs, and electrical safety limits must be configured on the real
+Micromouse.
+
+The design limits are derived from the identified operating point rather than
+claimed as universal hardware limits: rise time is at most
+`max(0.15 s, 1.5*tau)`, overshoot at most 10%, settling time at most
+`max(0.5 s, 4*tau)`, and steady-state error at most
+`max(1 RPM, 2% of target)`. The recommended damping band is `0.6 <= zeta <= 0.8`.
+For the ideal continuous linear PID model, the characteristic polynomial is
+`(tau + K*Kd)*s^2 + (1 + K*Kp)*s + K*Ki`; therefore
+`wn = sqrt(K*Ki/(tau + K*Kd))` and
+`zeta = (1 + K*Kp)/(2*sqrt((tau + K*Kd)*K*Ki))` when `Ki > 0`.
+This damping value is labeled as an approximation because sampling, saturation,
+anti-windup, real motor nonlinearities, and measurement noise are not part of
+that derivation. The time-domain pass/fail table uses the sampled simulation.
+
+Default demonstration controller settings are `K = 3 RPM/% PWM`, `tau = 0.35 s`,
+target `180 RPM`, `Kp = 0.7`, `Ki = 2 1/s`, `Kd = 0`, and `Ts = 0.02 s`.
+These are workflow examples, not final gains supported by physical motor data.
+Final identified parameters, gains, results, and physical validation remain
+blocked until Group 37 performs and records the real motor test.
 
 The [P1/P2 handoff](docs/plans/2026-11-21-pid-p1-p2-handoff.md) documents the
 shared functions, sensor-state extension and remaining submission tasks.
@@ -225,7 +276,7 @@ node --test tests/*.test.cjs
 
 The Module 1 suite contains 470 numerical assertions. The Module 2 suite contains 124 assertions covering amplitude ratio, phase, conversions, Bode magnitude, cutoff, dynamic error, design limits, low/high-frequency behavior, numerical stability, and homework validations 2 and 3. The Module 3 suite compares displacement and velocity against independent RK4 integration across all three regimes and checks the timing metrics, poles, and homework validations 4–6.
 
-The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 41 Node test cases reported across the toolkit pass.
+The Module 4 suite covers deterministic sensor generation, parameter ranges, closed-form responses, second-order normalization, noise bounds and stability, inclusive scoring boundaries, input validation, and single-submission session totals. All 49 Node test cases reported across the toolkit pass, including eight Micromouse identification and control cases.
 
 Local Chrome verification passed 52 browser checks covering all three challenge types, hidden answers, invalid inputs, 0/50/100 scoring, repeated submission, new rounds, graph loading and rendering recovery, keyboard navigation, 360-pixel layout, and the existing modules' prediction interactions and six homework validations. Desktop and phone screenshots were visually reviewed.
 
@@ -243,6 +294,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/models/pid-sensor.js` | First-order sensor state inside the PID feedback loop for P2 |
 | `js/models/digital-pid.js` | Sampled PID, zero-order hold, conditional anti-windup, and Arduino generation for P3 |
 | `js/models/pid-tuning-challenge.js` | Hidden random plant generation and three-part specification scoring for P4 |
+| `js/models/micromouse-system.js` | Motor-data parsing, first-order identification, motor specifications, shared sampled simulation, and Arduino adaptation |
 | `js/plotting.js` | Shared Plotly styling, rendering, and reset helpers |
 | `js/module1.js` | Module 1 controls, graph data, prediction, and validation |
 | `js/module2.js` | Module 2 controls, graphs, calculators, prediction, and validation |
@@ -252,6 +304,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `js/control-p2.js` | P2 sensor-lag controls, presets, plots, prediction, and diagnostics |
 | `js/control-p3.js` | P3 sampling, anti-windup, stair-step plots, prediction, and code-copy interaction |
 | `js/control-p4.js` | P4 hidden-plant attempts, score table, reveal, plots, and prediction interaction |
+| `js/my-system.js` | Micromouse identification, plots, controller checks, prediction exercise, and code-copy interaction |
 | `tests/first-order.test.cjs` | Independent Module 1 numerical verification |
 | `tests/frequency-response.test.cjs` | Module 2 equation and validation tests |
 | `tests/second-order.test.cjs` | Module 3 response, timing, and validation tests |
@@ -260,6 +313,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | `tests/pid-sensor.test.cjs` | P2 sensor dynamics, lag, oscillation, and bypass tests |
 | `tests/digital-pid.test.cjs` | P3 discrete equation, sampling, anti-windup, and generated-code tests |
 | `tests/pid-tuning-challenge.test.cjs` | P4 random range, feasibility, validation, and scoring tests |
+| `tests/micromouse-system.test.cjs` | Baseline-aware identification, motor limits, damping derivation, scaled specifications, and generated-code tests |
 
 ## Group members and module ownership
 
@@ -277,6 +331,7 @@ Local Chrome verification passed 52 browser checks covering all three challenge 
 | Homework 2 P2 - slow sensor in the loop | Saif | Implemented with delayed feedback, oscillation presets, and tests |
 | Homework 2 P3 - digital PID | Saif | Implemented with sampling, anti-windup, Arduino code, and tests |
 | Homework 2 P4 - tuning challenge | Saif | Implemented with hidden plants, specification scoring, and tests |
+| Homework 2 My System - Micromouse motor speed control | Yanal Omar | Implemented and numerically tested; real motor measurements remain required |
 
 ## Screenshots
 
@@ -304,3 +359,10 @@ model, the slow-sensor teaching interaction, and numerical regression tests.
 For Homework 2 P3 and P4, AI assistance supported the sampled-controller model,
 anti-windup logic, Arduino code generation, hidden-plant scoring, responsive
 interactions, and numerical/browser verification.
+
+For Homework 2 My System, AI assistance supported the baseline-aware
+identification workflow, reuse of the digital PID model, controller-specification
+derivation, responsive interface, generated integration hooks, documentation,
+and numerical/browser checks. Yanal Omar remains responsible for understanding
+the equations and code, collecting real Micromouse data, selecting final gains,
+and validating the controller safely on hardware.
